@@ -1,0 +1,39 @@
+<?php
+/**
+ * @file
+ * helpdesk_tickets.module
+ */
+
+/**
+ * Implementation of hook_node_info().
+ */
+function helpdesk_tickets_node_info() {
+    return array(
+        'helpdesk_ticket' => array(
+            'name' => t('Helpdesk ticket'),
+            'base' => 'helpdesk_tickets',
+            'description' => t('A <em>helpdesk ticket</em>.')
+        )
+    );
+}
+
+/**
+ * Implementation of hook_form().
+ */
+function helpdesk_tickets_form($node, &$form_state) {
+    // Get the default implementation of hook_form()
+    $form = node_content_form($node, $form_state);
+
+    $form['priority'] = array(
+        '#type' => 'select',
+        '#title' => t('Priority'),
+        '#options' => array(
+            0 => t('Low'),
+            1 => t('Medium'),
+            2 => t('High')
+        ),
+        '#description' => t('Select how urgent this issue is.')
+    );
+
+    return $form;
+}
