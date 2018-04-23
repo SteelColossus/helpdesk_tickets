@@ -4,10 +4,84 @@
  * helpdesk_tickets.install
  */
 
+/**
+ * Implementation of hook_schema().
+ */
+function helpdesk_tickets_schema() {
+    $schema = array();
+
+    $schema['helpdesk_ticket'] = array(
+        'description' => 'Stores information about helpdesk tickets.',
+        'fields' => array(
+            'nid' => array(
+                'description' => 'The primary identifier for a helpdesk_ticket node.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'priority' => array(
+                'description' => 'How important this helpdesk ticket is.',
+                'type' => 'int',
+                'size' => 'small',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'is_open' => array(
+                'description' => 'Whether this ticket is currently open.',
+                'type' => 'int',
+                'size' => 'tiny'
+            )
+        ),
+        'primary key' => array('nid')
+    );
+
+    $schema['helpdesk_priority'] = array(
+        'description' => 'Stores the different priorities of helpdesk tickets.',
+        'fields' => array(
+            'pid' => array(
+                'description' => 'The primary identifier for a helpdesk priority.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'priority' => array(
+                'description' => 'A one word description for the priority of this ticket.',
+                'type' => 'varchar',
+                'length' => 6,
+                'not null' => TRUE
+            )
+        ),
+        'primary key' => array('pid')
+    );
+
+    return $schema;
+}
+
  /**
   * Implementation of hook_install().
   */
 function helpdesk_tickets_install() {
+    // Add ticket priorities.
+    $priority_values = array(
+        array(
+            'priority' => 'low'
+        ),
+        array(
+            'priority' => 'medium'
+        ),
+        array(
+            'priority' => 'high'
+        )
+    );
+
+    $query = db_insert('helpdesk_priority')->fields(array('priority'));
+
+    foreach ($priority_values as $record) {
+        $query->values($record);
+    }
+
+    $query->execute();
+
     // Add body field to helpdesk_ticket type.
     node_types_rebuild();
     $types = node_type_get_types();
