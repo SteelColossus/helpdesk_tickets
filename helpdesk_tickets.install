@@ -61,7 +61,7 @@ function helpdesk_tickets_schema() {
   * Implementation of hook_install().
   */
 function helpdesk_tickets_install() {
-    // Add ticket priorities.
+    // Add ticket priorities
     $priority_values = array(
         array(
             'priority' => 'low'
@@ -82,7 +82,7 @@ function helpdesk_tickets_install() {
 
     $query->execute();
 
-    // Add body field to helpdesk_ticket type.
+    // Add body field to helpdesk_ticket type
     node_types_rebuild();
     $types = node_type_get_types();
     node_add_body_field($types['helpdesk_ticket']);

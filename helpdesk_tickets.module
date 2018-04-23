@@ -24,16 +24,79 @@ function helpdesk_tickets_form($node, &$form_state) {
     // Get the default implementation of hook_form()
     $form = node_content_form($node, $form_state);
 
+    $result = db_select('helpdesk_priority', 'p')
+                    ->fields('p', array('pid', 'priority'))
+                    ->execute();
+    $priorities = array();
+
+    foreach ($result as $priority) {
+        $priorities[$priority->pid] = $priority->priority;
+    }
+
     $form['priority'] = array(
         '#type' => 'select',
         '#title' => t('Priority'),
-        '#options' => array(
-            0 => t('Low'),
-            1 => t('Medium'),
-            2 => t('High')
-        ),
-        '#description' => t('Select how urgent this issue is.')
+        '#options' => $priorities,
+        '#description' => t('Select how urgent this issue is.'),
+        '#default_value' => isset($node->priority) ? $node->priority : 2
     );
 
     return $form;
+}
+
+/**
+ * Implementation of hook_node_load().
+ */
+function helpdesk_tickets_node_load($nodes, $types) {
+    $result = db_query('SELECT nid, priority FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
+    
+    foreach ($result as $record) {
+        if ($nodes[$record->nid]->type == 'helpdesk_ticket') {
+            $nodes[$record->nid]->priority = $record->priority;
+        }
+    }
+}  
+
+/**
+ * Implementation of hook_node_insert().
+ */
+function helpdesk_tickets_node_insert($node) {
+    if ($node->type == 'helpdesk_ticket') {
+        _helpdesk_tickets_node_merge($node);
+    }
+}
+
+/**
+ * Implementation of hook_node_update().
+ */
+function helpdesk_tickets_node_update($node) {
+    if ($node->type == 'helpdesk_ticket') {
+        _helpdesk_tickets_node_merge($node);
+    }
+}
+
+/**
+ * Helper function for inserting or updating a node.
+ */
+function _helpdesk_tickets_node_merge($node) {
+    // Add or update the ticket
+    db_merge('helpdesk_ticket')
+        ->key(array('nid' => $node->nid))
+        ->fields(array(
+            'nid' => $node->nid,
+            'priority' => $node->priority,
+            'is_open' => TRUE
+        ))
+        ->execute();
+}
+
+/**
+ * Implementation of hook_node_delete().
+ */
+function helpdesk_tickets_node_delete($node) {
+    if ($node->type == 'helpdesk_ticket') {
+        db_delete('helpdesk_ticket')
+            ->condition('nid', $node->nid)
+            ->execute();
+    }
 }
