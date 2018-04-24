@@ -26,10 +26,12 @@ function helpdesk_tickets_schema() {
                 'unsigned' => TRUE,
                 'not null' => TRUE
             ),
-            'is_open' => array(
-                'description' => 'Whether this ticket is currently open.',
+            'state' => array(
+                'description' => 'The current state of this ticket.',
                 'type' => 'int',
-                'size' => 'tiny'
+                'size' => 'small',
+                'unsigned' => TRUE,
+                'not null' => TRUE
             )
         ),
         'primary key' => array('nid')
@@ -39,7 +41,7 @@ function helpdesk_tickets_schema() {
         'description' => 'Stores the different priorities of helpdesk tickets.',
         'fields' => array(
             'pid' => array(
-                'description' => 'The primary identifier for a helpdesk priority.',
+                'description' => 'The primary identifier for a ticket\'s priority.',
                 'type' => 'serial',
                 'unsigned' => TRUE,
                 'not null' => TRUE
@@ -52,6 +54,25 @@ function helpdesk_tickets_schema() {
             )
         ),
         'primary key' => array('pid')
+    );
+
+    $schema['helpdesk_state'] = array(
+        'description' => 'Stores the different states of helpdesk tickets.',
+        'fields' => array(
+            'sid' => array(
+                'description' => 'The primary identifier for a ticket\'s state.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'state' => array(
+                'description' => 'A one word description for the state of this ticket.',
+                'type' => 'varchar',
+                'length' => 6,
+                'not null' => TRUE
+            )
+        ),
+        'primary key' => array('sid')
     );
 
     return $schema;
@@ -77,6 +98,24 @@ function helpdesk_tickets_install() {
     $query = db_insert('helpdesk_priority')->fields(array('priority'));
 
     foreach ($priority_values as $record) {
+        $query->values($record);
+    }
+
+    $query->execute();
+
+    // Add ticket states
+    $state_values = array(
+        array(
+            'state' => 'open'
+        ),
+        array(
+            'state' => 'closed'
+        )
+    );
+
+    $query = db_insert('helpdesk_state')->fields(array('state'));
+
+    foreach ($state_values as $record) {
         $query->values($record);
     }
 
