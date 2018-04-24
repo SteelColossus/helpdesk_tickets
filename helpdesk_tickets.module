@@ -6,12 +6,13 @@
 
 /**
  * Implementation of hook_node_info().
+ * Define module-provided node types.
  */
 function helpdesk_tickets_node_info() {
     return array(
         'helpdesk_ticket' => array(
             'name' => t('Helpdesk ticket'),
-            'base' => 'helpdesk_tickets',
+            'base' => 'helpdesk_ticket',
             'description' => t('A <em>helpdesk ticket</em>.')
         )
     );
@@ -19,8 +20,10 @@ function helpdesk_tickets_node_info() {
 
 /**
  * Implementation of hook_form().
+ * Display a node editing form.
+ * Node-type specific.
  */
-function helpdesk_tickets_form($node, &$form_state) {
+function helpdesk_ticket_form($node, &$form_state) {
     // Get the default implementation of hook_form()
     $form = node_content_form($node, $form_state);
 
@@ -62,41 +65,41 @@ function helpdesk_tickets_form($node, &$form_state) {
 }
 
 /**
- * Implementation of hook_node_load().
+ * Implementation of hook_load().
+ * Act on nodes being loaded from the database.
+ * Node-type specific.
  */
-function helpdesk_tickets_node_load($nodes, $types) {
+function helpdesk_ticket_load($nodes) {
     $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
     
     foreach ($result as $record) {
-        if ($nodes[$record->nid]->type == 'helpdesk_ticket') {
-            $nodes[$record->nid]->priority = $record->priority;
-            $nodes[$record->nid]->state = $record->state;
-        }
+        $nodes[$record->nid]->priority = $record->priority;
+        $nodes[$record->nid]->state = $record->state;
     }
 }
 
 /**
- * Implementation of hook_node_insert().
+ * Implementation of hook_insert().
+ * Respond to creation of a new node.
+ * Node-type specific.
  */
-function helpdesk_tickets_node_insert($node) {
-    if ($node->type == 'helpdesk_ticket') {
-        _helpdesk_tickets_node_merge($node);
-    }
+function helpdesk_ticket_insert($node) {
+    _helpdesk_ticket_merge($node);
 }
 
 /**
- * Implementation of hook_node_update().
+ * Implementation of hook_update().
+ * Respond to updates to a node.
+ * Node-type specific.
  */
-function helpdesk_tickets_node_update($node) {
-    if ($node->type == 'helpdesk_ticket') {
-        _helpdesk_tickets_node_merge($node);
-    }
+function helpdesk_ticket_update($node) {
+    _helpdesk_ticket_merge($node);
 }
 
 /**
  * Helper function for inserting or updating a node.
  */
-function _helpdesk_tickets_node_merge($node) {
+function _helpdesk_ticket_merge($node) {
     // Add or update the ticket
     db_merge('helpdesk_ticket')
         ->key(array('nid' => $node->nid))
@@ -109,12 +112,12 @@ function _helpdesk_tickets_node_merge($node) {
 }
 
 /**
- * Implementation of hook_node_delete().
+ * Implementation of hook_delete().
+ * Respond to node deletion.
+ * Node-type specific.
  */
-function helpdesk_tickets_node_delete($node) {
-    if ($node->type == 'helpdesk_ticket') {
-        db_delete('helpdesk_ticket')
-            ->condition('nid', $node->nid)
-            ->execute();
-    }
+function helpdesk_ticket_delete($node) {
+    db_delete('helpdesk_ticket')
+        ->condition('nid', $node->nid)
+        ->execute();
 }

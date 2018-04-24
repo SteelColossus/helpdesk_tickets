@@ -6,6 +6,7 @@
 
 /**
  * Implementation of hook_schema().
+ * Define the current version of the database schema.
  */
 function helpdesk_tickets_schema() {
     $schema = array();
@@ -78,9 +79,10 @@ function helpdesk_tickets_schema() {
     return $schema;
 }
 
- /**
-  * Implementation of hook_install().
-  */
+/**
+ * Implementation of hook_install().
+ * Perform setup tasks when the module is installed.
+ */
 function helpdesk_tickets_install() {
     // Add ticket priorities
     $priority_values = array(
