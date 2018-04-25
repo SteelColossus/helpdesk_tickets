@@ -142,7 +142,8 @@ function helpdesk_tickets_menu() {
         'ticket_list' => array(
             'title' => 'Helpdesk Ticket Overview',
             'type' => MENU_NORMAL_ITEM,
-            'page callback' => 'helpdesk_tickets_list_page'
+            'page callback' => 'helpdesk_tickets_list_page',
+            'access callback' => TRUE
         )
     );
     
