@@ -19,6 +19,20 @@ function helpdesk_tickets_node_info() {
 }
 
 /**
+ * Implementation of hook_load().
+ * Act on nodes being loaded from the database.
+ * Node-type specific.
+ */
+function helpdesk_ticket_load($nodes) {
+    $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
+    
+    foreach ($result as $record) {
+        $nodes[$record->nid]->priority = $record->priority;
+        $nodes[$record->nid]->state = $record->state;
+    }
+}
+
+/**
  * Implementation of hook_form().
  * Display a node editing form.
  * Node-type specific.
@@ -48,20 +62,6 @@ function helpdesk_ticket_form($node, &$form_state) {
     );
 
     return $form;
-}
-
-/**
- * Implementation of hook_load().
- * Act on nodes being loaded from the database.
- * Node-type specific.
- */
-function helpdesk_ticket_load($nodes) {
-    $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
-    
-    foreach ($result as $record) {
-        $nodes[$record->nid]->priority = $record->priority;
-        $nodes[$record->nid]->state = $record->state;
-    }
 }
 
 /**

@@ -76,6 +76,24 @@ function helpdesk_tickets_schema() {
         'primary key' => array('sid')
     );
 
+    $schema['helpdesk_caller'] = array(
+        'description' => 'Stores the company employees that call in with problems.',
+        'fields' => array(
+            'cid' => array(
+                'description' => 'The primary identifier for a caller.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'name' => array(
+                'description' => 'The full name of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            )
+        )
+    );
+
     return $schema;
 }
 
