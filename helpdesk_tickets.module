@@ -154,7 +154,17 @@ function helpdesk_tickets_menu() {
  * Defines how the ticket list page will look like.
  */
 function helpdesk_tickets_list_page() {
-    return 'This is some example text.';
+    $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket}');
+
+    $rows = array();
+
+    foreach ($result as $record) {
+        $rows[] = array($record->nid, $record->priority, $record->state);
+    }
+   
+    $output = theme('table', array('header' => 'Tickets', 'rows' => $result->fetch));
+
+    return $output;
 }
 
 /**
