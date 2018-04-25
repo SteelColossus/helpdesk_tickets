@@ -140,7 +140,7 @@ function helpdesk_ticket_delete($node) {
 function helpdesk_tickets_menu() {
     $items = array(
         'ticket_list' => array(
-            'title' => 'Helpdesk Ticket Overview',
+            'title' => 'Helpdesk Tickets Overview',
             'type' => MENU_NORMAL_ITEM,
             'page callback' => 'helpdesk_tickets_list_page',
             'access callback' => TRUE
@@ -157,15 +157,23 @@ function helpdesk_tickets_list_page() {
     $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket}');
 
     $rows = array();
-    $header = array('Title', 'Priority', 'State');
+    $header = array('Issue', 'Priority', 'State');
 
     foreach ($result as $record) {
-        $rows[] = array($record->nid, $record->priority, $record->state);
+        $rows[] = array(_get_ticket_title($record->nid), _get_priority_name($record->priority), _get_state_name($record->state));
     }
    
     $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     return $output;
+}
+
+/**
+ * Helper function to get the title of a helpdesk ticket given its node id.
+ */
+function _get_ticket_title($nid) {
+    $result = db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $nid));
+    return $result->fetchField();
 }
 
 /**
