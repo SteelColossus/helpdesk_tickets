@@ -134,6 +134,29 @@ function helpdesk_ticket_delete($node) {
 }
 
 /**
+ * Implementation of hook_menu().
+ * Define menu items and page callbacks.
+ */
+function helpdesk_tickets_menu() {
+    $items = array(
+        'ticket_list' => array(
+            'title' => 'Helpdesk Ticket Overview',
+            'type' => MENU_NORMAL_ITEM,
+            'page callback' => 'helpdesk_tickets_list_page'
+        )
+    );
+    
+    return $items;
+}
+
+/**
+ * Defines how the ticket list page will look like.
+ */
+function helpdesk_tickets_list_page() {
+    return 'This is some example text.';
+}
+
+/**
  * Helper function to get the name of a priority given its unique id.
  */
 function _get_priority_name($pid) {
