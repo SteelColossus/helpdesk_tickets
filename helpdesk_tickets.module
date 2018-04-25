@@ -27,14 +27,7 @@ function helpdesk_ticket_form($node, &$form_state) {
     // Get the default implementation of hook_form()
     $form = node_content_form($node, $form_state);
 
-    $result = db_select('helpdesk_priority', 'p')
-                    ->fields('p', array('pid', 'priority'))
-                    ->execute();
-    $priorities = array();
-
-    foreach ($result as $priority) {
-        $priorities[$priority->pid] = $priority->priority;
-    }
+    $priorities = _get_full_priority_list();
 
     $form['priority'] = array(
         '#type' => 'select',
@@ -44,14 +37,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#default_value' => isset($node->priority) ? $node->priority : 2
     );
 
-    $result = db_select('helpdesk_state', 's')
-                    ->fields('s', array('sid', 'state'))
-                    ->execute();
-    $states = array();
-
-    foreach ($result as $state) {
-        $states[$state->sid] = $state->state;
-    }
+    $states = _get_full_state_list();
 
     $form['state'] = array(
         '#type' => 'select',
@@ -84,8 +70,7 @@ function helpdesk_ticket_load($nodes) {
  * Node-type specific.
  */
 function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
-    $result = db_query('SELECT priority FROM {helpdesk_priority} WHERE pid = :pid', array(':pid' => $node->priority));
-    $priority_text = t(ucwords($result->fetchField()));
+    $priority_text = t(ucwords(_get_priority_name($node->priority)));
 
     $node->content['priority'] = array(
         '#type' => 'item',
@@ -93,8 +78,7 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $priority_text
     );
 
-    $result = db_query('SELECT state FROM {helpdesk_state} WHERE sid = :sid', array(':sid' => $node->state));
-    $state_text = t(ucwords($result->fetchField()));
+    $state_text = t(ucwords(_get_state_name($node->state)));
 
     $node->content['state'] = array(
         '#type' => 'item',
@@ -147,4 +131,54 @@ function helpdesk_ticket_delete($node) {
     db_delete('helpdesk_ticket')
         ->condition('nid', $node->nid)
         ->execute();
+}
+
+/**
+ * Helper function to get the name of a priority given its unique id.
+ */
+function _get_priority_name($pid) {
+    $result = db_query('SELECT priority FROM {helpdesk_priority} WHERE pid = :pid', array(':pid' => $pid));
+    return $result->fetchField();
+}
+
+/**
+ * Helper function to get the name of a state given its unique id.
+ */
+function _get_state_name($sid) {
+    $result = db_query('SELECT state FROM {helpdesk_state} WHERE sid = :sid', array(':sid' => $sid));
+    return $result->fetchField();
+}
+
+/**
+ * Helper function to get the list of all priorities mapped with unique id and name.
+ */
+function _get_full_priority_list() {
+    $priorities = array();
+
+    $result = db_select('helpdesk_priority', 'p')
+        ->fields('p', array('pid', 'priority'))
+        ->execute();
+
+    foreach ($result as $priority) {
+        $priorities[$priority->pid] = $priority->priority;
+    }
+
+    return $priorities;
+}
+
+/**
+ * Helper function to get the list of all states mapped with unique id and name.
+ */
+function _get_full_state_list() {
+    $states = array();
+
+    $result = db_select('helpdesk_state', 's')
+        ->fields('s', array('sid', 'state'))
+        ->execute();
+
+    foreach ($result as $state) {
+        $states[$state->sid] = $state->state;
+    }
+
+    return $states;
 }
