@@ -157,12 +157,13 @@ function helpdesk_tickets_list_page() {
     $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket}');
 
     $rows = array();
+    $header = array('Title', 'Priority', 'State');
 
     foreach ($result as $record) {
         $rows[] = array($record->nid, $record->priority, $record->state);
     }
    
-    $output = theme('table', array('header' => 'Tickets', 'rows' => $result->fetch));
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     return $output;
 }
