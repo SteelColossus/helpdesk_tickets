@@ -79,6 +79,33 @@ function helpdesk_ticket_load($nodes) {
 }
 
 /**
+ * Implementation of hook_view().
+ * Display a node.
+ * Node-type specific.
+ */
+function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
+    $result = db_query('SELECT priority FROM {helpdesk_priority} WHERE pid = :pid', array(':pid' => $node->priority));
+    $priority_text = t(ucwords($result->fetchField()));
+
+    $node->content['priority'] = array(
+        '#type' => 'item',
+        '#title' => t('Priority'),
+        '#markup' => $priority_text
+    );
+
+    $result = db_query('SELECT state FROM {helpdesk_state} WHERE sid = :sid', array(':sid' => $node->state));
+    $state_text = t(ucwords($result->fetchField()));
+
+    $node->content['state'] = array(
+        '#type' => 'item',
+        '#title' => t('State'),
+        '#markup' => $state_text
+    );
+
+    return $node;
+}
+
+/**
  * Implementation of hook_insert().
  * Respond to creation of a new node.
  * Node-type specific.
