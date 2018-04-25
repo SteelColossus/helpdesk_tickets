@@ -154,7 +154,7 @@ function helpdesk_tickets_menu() {
  * Defines how the ticket list page will look like.
  */
 function helpdesk_tickets_list_page() {
-    $result = db_query('SELECT n.title, p.priority, s.state
+    $result = db_query('SELECT n.title, n.created, p.priority, s.state
                         FROM {helpdesk_ticket} AS t
                         INNER JOIN {node} AS n
                         ON t.nid = n.nid
@@ -164,10 +164,10 @@ function helpdesk_tickets_list_page() {
                         ON t.state = s.sid');
 
     $rows = array();
-    $header = array('Issue', 'Priority', 'State');
+    $header = array('Issue', 'Priority', 'State', 'Date');
 
     foreach ($result as $record) {
-        $rows[] = array($record->title, $record->priority, $record->state);
+        $rows[] = array($record->title, $record->priority, $record->state, format_date($record->created));
     }
    
     $output = theme('table', array('header' => $header, 'rows' => $rows));
