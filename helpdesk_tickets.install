@@ -91,7 +91,8 @@ function helpdesk_tickets_schema() {
                 'length' => 64,
                 'not null' => TRUE
             )
-        )
+        ),
+        'primary key' => array('cid')
     );
 
     return $schema;
