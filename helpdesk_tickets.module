@@ -25,7 +25,7 @@ function helpdesk_tickets_node_info() {
  */
 function helpdesk_ticket_load($nodes) {
     $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
-    
+
     foreach ($result as $record) {
         $nodes[$record->nid]->priority = $record->priority;
         $nodes[$record->nid]->state = $record->state;
@@ -139,15 +139,21 @@ function helpdesk_ticket_delete($node) {
  */
 function helpdesk_tickets_menu() {
     $items = array(
-        'admin/config/system/helpdesk_tickets' => array(
-            'title' => 'Helpdesk Clients'
+        'ticket_list' => array(
+            'title' => 'Helpdesk Tickets Overview',
+            'type' => MENU_NORMAL_ITEM,
+            'page callback' => 'helpdesk_tickets_list_page',
+            'access callback' => TRUE
+        ),
+        'admin/config/helpdesk_tickets' => array(
+            'title' => 'Helpdesk Clients',
             'type' => MENU_NORMAL_ITEM,
             'page callback' => 'drupal_get_form',
             'page arguments' => array('helpdesk_client_form'),
-            'access arguments' => array('administer helpdesk_tickets')
-)
+            'access arguments' => array('administer helpdesk_tickets'),
+        )
     );
-    
+
     return $items;
 }
 
@@ -155,23 +161,44 @@ function helpdesk_tickets_menu() {
 *  Administration form for Helpdesk Clients
 */
 function helpdesk_client_form($form, &$form_state){
-    $form['client_id'] = array(
+      $form['client_id'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client ID'), 
         '#default_value' => variable_get('client_id', ''), 
         '#size' => 60, 
         '#maxlength' => 128, 
     );
-     
-    
+    $form['client_name'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Client Name'), 
+        '#default_value' => variable_get('client_name', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+    );
+    $form['client_ext_no'] = array(
+        '#type' => 'textfield', 
+        '#title' => t("Client's Extension Number"), 
+        '#default_value' => variable_get('client_ext_no', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+    );
+    $form['client_dept'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Client Department'), 
+        '#default_value' => variable_get('client_dept', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+    );
+   
     return system_settings_form($form);
+
 }
 
 
 /**
  * Implementation of hook_permission().
  * Define user permissions.
- */
+*/
 function helpdesk_tickets_permission() {
   return array(
     'administer helpdesk_tickets' => array(
@@ -202,7 +229,7 @@ function helpdesk_tickets_list_page() {
     foreach ($result as $record) {
         $rows[] = array($record->title, $record->priority, $record->state, format_date($record->created, 'short'), $record->name);
     }
-   
+
     $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     return $output;
