@@ -1,3 +1,4 @@
 name = Helpdesk Tickets
 description = Allows for the creation of tickets for helpdesk problems that can then be assigned to specialists.
 core = 7.x
+configure = admin/config/helpdesk_tickets
