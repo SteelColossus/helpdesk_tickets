@@ -144,13 +144,6 @@ function helpdesk_tickets_menu() {
             'type' => MENU_NORMAL_ITEM,
             'page callback' => 'helpdesk_tickets_list_page',
             'access callback' => TRUE
-        ),
-        'admin/config/helpdesk_tickets' => array(
-            'title' => 'Tab 1'
-            'type' => MENU_DEFAULT_LOCAL_TASK,
-            'page callback' => 'drupal_get_form',
-            'page arguments' => array('helpdesk_client_form'),
-            'access arguments' => array('administer helpdesk_tickets')
         )
     );
     
