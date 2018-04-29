@@ -138,13 +138,19 @@ function helpdesk_ticket_delete($node) {
  * Define menu items and page callbacks.
  */
 function helpdesk_tickets_menu() {
-    $items = array(
-        'ticket_list' => array(
-            'title' => 'Helpdesk Tickets Overview',
-            'type' => MENU_NORMAL_ITEM,
-            'page callback' => 'helpdesk_tickets_list_page',
-            'access callback' => TRUE
-        )
+    $items['ticket_list'] = array(
+        'title' => 'Helpdesk Tickets Overview',
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => 'helpdesk_tickets_list_page',
+        'access callback' => TRUE
+    );
+    
+    $items['admin/config/system/helpdesk_tickets'] = array(
+        'title' => 'Helpdesk Clients'
+        'type' => MENU_NORMAL_ITEM,
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('helpdesk_client_form'),
+        'access arguments' => array('administer helpdesk_tickets')
     );
     
     return $items;
