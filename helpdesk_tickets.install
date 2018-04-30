@@ -90,10 +90,24 @@ function helpdesk_tickets_schema() {
                 'type' => 'varchar',
                 'length' => 64,
                 'not null' => TRUE
-            )
+            ),
+            'ext_no' => array(
+                'description' => 'The extension number of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
+            'dept' => array(
+                'description' => "The caller's department.",
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
         ),
         'primary key' => array('cid')
     );
+    
+    
 
     return $schema;
 }

@@ -60,7 +60,6 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#description' => t('Select what state this issue is in.'),
         '#default_value' => isset($node->state) ? $node->state : 1
     );
-
     return $form;
 }
 
@@ -145,15 +144,39 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_tickets_list_page',
             'access callback' => TRUE
         ),
-        'admin/config/helpdesk_tickets' => array(
-            'title' => 'Helpdesk Clients',
-            'type' => MENU_NORMAL_ITEM,
+        'admin/helpdesk_tickets' => array(
+            'title' => 'Helpdesk Ticketing System',
+            'description' => 'Configure the helpdesk ticketing system.',
+            'position' => 'right',
+            'weight' => 5,
+            'page callback' => 'helpdesk_tickets_admin_menu_block_page',
+            'access arguments' => array('administer helpdesk_tickets'),
+            'file' => 'helpdesk_tickets.admin.inc',
+        ),
+        'admin/helpdesk_tickets/tab1' => array(
+            'title' => 'Helpdesk Client Settings',
+            'type' => MENU_DEFAULT_LOCAL_TASK,
+            'description' => 'Configure the helpdesk ticketing system.',
+            'position' => 'right',
+            'weight' => 5,
+            'page callback' => 'helpdesk_tickets_admin_menu_block_page',
+            'access arguments' => array('administer helpdesk_tickets'),
+            'file' => 'helpdesk_tickets.admin.inc',
+        ),
+        'admin/helpdesk_tickets/tab2' => array(
+            'title' => 'Add Helpdesk Clients',
+            'type' => MENU_LOCAL_TASK,
             'page callback' => 'drupal_get_form',
             'page arguments' => array('helpdesk_client_form'),
             'access arguments' => array('administer helpdesk_tickets'),
-        )
+        ),
+        'admin/helpdesk_tickets/tab3' => array(
+            'title' => 'Helpdesk Client List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_client_submissions',
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
     );
-
     return $items;
 }
 
@@ -161,51 +184,90 @@ function helpdesk_tickets_menu() {
 *  Administration form for Helpdesk Clients
 */
 function helpdesk_client_form($form, &$form_state){
-      $form['client_id'] = array(
+    /**$form['helpdesk_tickets_client_id'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client ID'), 
         '#default_value' => variable_get('client_id', ''), 
         '#size' => 60, 
         '#maxlength' => 128, 
-    );
-    $form['client_name'] = array(
+        '#required' => TRUE,
+    );*/
+    $form['helpdesk_tickets_client_name'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client Name'), 
         '#default_value' => variable_get('client_name', ''), 
         '#size' => 60, 
-        '#maxlength' => 128, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
     );
-    $form['client_ext_no'] = array(
+    $form['helpdesk_tickets_client_ext_no'] = array(
         '#type' => 'textfield', 
         '#title' => t("Client's Extension Number"), 
         '#default_value' => variable_get('client_ext_no', ''), 
         '#size' => 60, 
-        '#maxlength' => 128, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
     );
-    $form['client_dept'] = array(
+    $form['helpdesk_tickets_client_dept'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client Department'), 
         '#default_value' => variable_get('client_dept', ''), 
         '#size' => 60, 
-        '#maxlength' => 128, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
     );
-   
-    return system_settings_form($form);
 
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add Client'),
+    );
+    return $form;
 }
 
+function helpdesk_client_form_validate($form, &$form_state) {
+    return TRUE;
+}
+
+function helpdesk_client_form_submit($form, &$form_state){
+    $cid = db_insert('helpdesk_caller')
+        ->fields(array(
+            'name' => $form_state['values']['helpdesk_tickets_client_name'],
+            'ext_no' => $form_state['values']['helpdesk_tickets_client_ext_no'],
+            'dept' => $form_state['values']['helpdesk_tickets_client_dept'],
+        ))
+        ->execute();
+
+    drupal_set_message(t('Your form entry has been added.'));
+}
+
+function helpdesk_client_submissions(){
+    $results = db_query("SELECT * FROM {helpdesk_caller}");
+    
+    $header = array(t('Name'), t('Extension No'), t('Department'));
+    $rows = array();
+    
+    foreach($results AS $result){
+        $rows[] = array(
+            $result->name,
+            $result->ext_no,
+            $result->dept,
+        );
+    }
+    
+    return theme('table', array('header' => $header, 'rows' => $rows));
+}
 
 /**
  * Implementation of hook_permission().
  * Define user permissions.
 */
 function helpdesk_tickets_permission() {
-  return array(
-    'administer helpdesk_tickets' => array(
-      'title' => t('Administer Helpdesk Tickets'),
-      'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-    ),
-  );
+    return array(
+        'administer helpdesk_tickets' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+    );
 }
 
 /**
