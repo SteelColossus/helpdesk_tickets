@@ -66,7 +66,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $callers = _get_full_caller_list();
 
-    $form['cid'] = array(
+    $form['caller'] = array(
         '#type' => 'select',
         '#title' => t('Caller'),
         '#options' => $callers,
@@ -76,7 +76,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     if (isset($node->cid))
     {
-        $form['cid']['#default_value'] = $node->cid;
+        $form['caller']['#default_value'] = $node->cid;
     }
 
     return $form;
@@ -102,6 +102,14 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#type' => 'item',
         '#title' => t('State'),
         '#markup' => $state_text
+    );
+    
+    $caller_text = t(_get_caller_name($node->caller));
+
+    $node->content['caller'] = array(
+        '#type' => 'item',
+        '#title' => t('Caller'),
+        '#markup' => $caller_text
     );
 
     return $node;
@@ -136,7 +144,7 @@ function _helpdesk_ticket_merge($node) {
             'nid' => $node->nid,
             'priority' => $node->priority,
             'state' => $node->state,
-            'cid' => $node->cid
+            'cid' => $node->caller
         ))
         ->execute();
 }
@@ -338,6 +346,14 @@ function _get_priority_name($pid) {
  */
 function _get_state_name($sid) {
     $result = db_query('SELECT state FROM {helpdesk_state} WHERE sid = :sid', array(':sid' => $sid));
+    return $result->fetchField();
+}
+
+/**
+ * Helper function to get the name of a caller given their unique id.
+ */
+function _get_caller_name($cid) {
+    $result = db_query('SELECT name FROM {helpdesk_caller} WHERE cid = :cid', array(':cid' => $cid));
     return $result->fetchField();
 }
 
