@@ -25,8 +25,8 @@ function helpdesk_tickets_node_info() {
  */
 function helpdesk_ticket_load($nodes) {
     $query = db_select('helpdesk_ticket', 't')
-                ->fields('t', array('nid', 'priority', 'state', 'cid'))
-                ->condition('nid', array_keys($nodes), 'IN');
+        ->fields('t', array('nid', 'priority', 'state', 'cid'))
+        ->condition('nid', array_keys($nodes), 'IN');
 
     $result = $query->execute();
 
@@ -335,7 +335,11 @@ function helpdesk_tickets_list_page() {
  * Helper function to get the title of a helpdesk ticket given its node id.
  */
 function _get_ticket_title($nid) {
-    $result = db_query('SELECT title FROM {node} WHERE nid = :nid', array(':nid' => $nid));
+    $query = db_select('node', 'n')
+        ->fields('n', array('title'))
+        ->condition('nid', $nid, '=');
+
+    $result = $query->execute();
     return $result->fetchField();
 }
 
@@ -343,7 +347,11 @@ function _get_ticket_title($nid) {
  * Helper function to get the name of a priority given its unique id.
  */
 function _get_priority_name($pid) {
-    $result = db_query('SELECT priority FROM {helpdesk_priority} WHERE pid = :pid', array(':pid' => $pid));
+    $query = db_select('helpdesk_priority', 'p')
+        ->fields('p', array('priority'))
+        ->condition('pid', $pid, '=');
+
+    $result = $query->execute();
     return $result->fetchField();
 }
 
@@ -351,7 +359,11 @@ function _get_priority_name($pid) {
  * Helper function to get the name of a state given its unique id.
  */
 function _get_state_name($sid) {
-    $result = db_query('SELECT state FROM {helpdesk_state} WHERE sid = :sid', array(':sid' => $sid));
+    $query = db_select('helpdesk_state', 's')
+        ->fields('s', array('state'))
+        ->condition('sid', $sid, '=');
+
+    $result = $query->execute();
     return $result->fetchField();
 }
 
@@ -359,7 +371,11 @@ function _get_state_name($sid) {
  * Helper function to get the name of a caller given their unique id.
  */
 function _get_caller_name($cid) {
-    $result = db_query('SELECT name FROM {helpdesk_caller} WHERE cid = :cid', array(':cid' => $cid));
+    $query = db_select('helpdesk_caller', 'c')
+        ->fields('c', array('name'))
+        ->condition('cid', $cid, '=');
+
+    $result = $query->execute();
     return $result->fetchField();
 }
 
