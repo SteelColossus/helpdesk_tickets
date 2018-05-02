@@ -176,3 +176,15 @@ function helpdesk_tickets_install() {
     $types = node_type_get_types();
     node_add_body_field($types['helpdesk_ticket']);
 }
+
+/**
+ * Implementation of hook_uninstall().
+ * Remove any information that the module sets.
+ */
+function helpdesk_tickets_uninstall()
+{
+    // Delete all helpdesk_ticket nodes
+    db_delete('node')
+        ->condition('type', 'helpdesk_tickets')
+        ->execute();
+}
