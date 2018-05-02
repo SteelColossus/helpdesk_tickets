@@ -302,7 +302,7 @@ function helpdesk_tickets_permission() {
  * Defines how the ticket list page will look like.
  */
 function helpdesk_tickets_list_page() {
-    $result = db_query('SELECT n.title, n.created, u.name, p.priority, s.state
+    $result = db_query('SELECT n.title AS title, n.created AS date, u.name AS creator, p.priority AS priority, s.state AS state, c.name AS caller
                         FROM {helpdesk_ticket} AS t
                         INNER JOIN {node} AS n
                         ON t.nid = n.nid
@@ -311,13 +311,15 @@ function helpdesk_tickets_list_page() {
                         INNER JOIN {helpdesk_priority} AS p
                         ON t.priority = p.pid
                         INNER JOIN {helpdesk_state} AS s
-                        ON t.state = s.sid');
+                        ON t.state = s.sid
+                        INNER JOIN {helpdesk_caller} AS c
+                        ON t.cid = c.cid');
 
     $rows = array();
-    $header = array('Issue', 'Priority', 'State', 'Date', 'Created by');
+    $header = array('Issue', 'Caller', 'Priority', 'State', 'Date', 'Created by');
 
     foreach ($result as $record) {
-        $rows[] = array($record->title, $record->priority, $record->state, format_date($record->created, 'short'), $record->name);
+        $rows[] = array($record->title, $record->caller, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
     }
 
     $output = theme('table', array('header' => $header, 'rows' => $rows));
