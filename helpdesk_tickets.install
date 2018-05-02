@@ -33,6 +33,21 @@ function helpdesk_tickets_schema() {
                 'size' => 'small',
                 'unsigned' => TRUE,
                 'not null' => TRUE
+            ),
+            'cid' => array(
+                'description' => 'The primary identifier for a caller.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            )
+        ),
+        // Used for documentation only.
+        'foreign keys' => array(
+            'fk_caller_id' => array(
+                'table' => 'helpdesk_caller',
+                'columns' => array(
+                    'cid' => 'cid'
+                )
             )
         ),
         'primary key' => array('nid')
