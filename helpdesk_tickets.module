@@ -311,7 +311,7 @@ function helpdesk_tickets_list_page() {
         array('data' => t('Caller'), 'field' => 'caller'),
         array('data' => t('Priority'), 'field' => 'priority'),
         array('data' => t('State'), 'field' => 'state'),
-        array('data' => t('Date'), 'field' => 'date', 'sort' => 'DESC'),
+        array('data' => t('Date'), 'field' => 'date', 'sort' => 'desc'),
         array('data' => t('Created by'), 'field' => 'creator')
     );
 
