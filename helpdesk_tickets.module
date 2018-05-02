@@ -60,6 +60,16 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#description' => t('Select what state this issue is in.'),
         '#default_value' => isset($node->state) ? $node->state : 1
     );
+
+    $callers = _get_full_caller_list();
+
+    $form['caller'] = array(
+        '#type' => 'select',
+        '#title' => t('Caller'),
+        '#options' => $callers,
+        '#description' => t('Select the name of the person who called in with this issue.')
+    );
+
     return $form;
 }
 
@@ -353,4 +363,21 @@ function _get_full_state_list() {
     }
 
     return $states;
+}
+
+/**
+ * Helper function to get the list of all callers mapped with unique id and name.
+ */
+function _get_full_caller_list() {
+    $callers = array();
+
+    $result = db_select('helpdesk_caller', 'c')
+        ->fields('c', array('cid', 'name'))
+        ->execute();
+
+    foreach ($result as $caller) {
+        $callers[$caller->cid] = $caller->name;
+    }
+
+    return $callers;
 }
