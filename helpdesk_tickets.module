@@ -66,7 +66,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $callers = _get_full_caller_list();
 
-    $form['caller'] = array(
+    $form['cid'] = array(
         '#type' => 'select',
         '#title' => t('Caller'),
         '#options' => $callers,
@@ -76,7 +76,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     if (isset($node->cid))
     {
-        $form['caller']['#default_value'] = $node->cid;
+        $form['cid']['#default_value'] = $node->cid;
     }
 
     return $form;
