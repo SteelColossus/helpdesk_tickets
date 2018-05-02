@@ -306,18 +306,22 @@ function helpdesk_tickets_permission() {
  * Defines how the ticket list page will look like.
  */
 function helpdesk_tickets_list_page() {
-    $result = db_query('SELECT n.title AS title, n.created AS date, u.name AS creator, p.priority AS priority, s.state AS state, c.name AS caller
-                        FROM {helpdesk_ticket} AS t
-                        INNER JOIN {node} AS n
-                        ON t.nid = n.nid
-                        INNER JOIN {users} AS u
-                        ON n.uid = u.uid
-                        INNER JOIN {helpdesk_priority} AS p
-                        ON t.priority = p.pid
-                        INNER JOIN {helpdesk_state} AS s
-                        ON t.state = s.sid
-                        INNER JOIN {helpdesk_caller} AS c
-                        ON t.cid = c.cid');
+    $query = db_select('helpdesk_ticket', 't');
+    
+    $query->join('node', 'n', 't.nid = n.nid');
+    $query->join('users', 'u', 'n.uid = u.uid');
+    $query->join('helpdesk_priority', 'p', 't.priority = p.pid');
+    $query->join('helpdesk_state', 's', 't.state = s.sid');
+    $query->join('helpdesk_caller', 'c', 't.cid = c.cid');
+
+    $query->addField('n', 'title', 'title');
+    $query->addField('n', 'created', 'date');
+    $query->addField('u', 'name', 'creator');
+    $query->addField('p', 'priority', 'priority');
+    $query->addField('s', 'state', 'state');
+    $query->addField('c', 'name', 'caller');
+
+    $result = $query->execute();
 
     $rows = array();
     $header = array('Issue', 'Caller', 'Priority', 'State', 'Date', 'Created by');
