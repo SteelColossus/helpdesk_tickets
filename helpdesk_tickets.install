@@ -185,6 +185,6 @@ function helpdesk_tickets_uninstall()
 {
     // Delete all helpdesk_ticket nodes
     db_delete('node')
-        ->condition('type', 'helpdesk_tickets')
+        ->condition('type', 'helpdesk_ticket')
         ->execute();
 }
