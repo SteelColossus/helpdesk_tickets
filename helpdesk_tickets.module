@@ -24,7 +24,11 @@ function helpdesk_tickets_node_info() {
  * Node-type specific.
  */
 function helpdesk_ticket_load($nodes) {
-    $result = db_query('SELECT nid, priority, state, cid FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
+    $query = db_select('helpdesk_ticket', 't')
+                ->fields('t', array('nid', 'priority', 'state', 'cid'))
+                ->condition('nid', array_keys($nodes), 'IN');
+
+    $result = $query->execute();
 
     foreach ($result as $record) {
         $nodes[$record->nid]->priority = $record->priority;
