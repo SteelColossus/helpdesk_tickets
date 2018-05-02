@@ -306,7 +306,17 @@ function helpdesk_tickets_permission() {
  * Defines how the ticket list page will look like.
  */
 function helpdesk_tickets_list_page() {
-    $query = db_select('helpdesk_ticket', 't');
+    $header = array(
+        array('data' => t('Issue'), 'field' => 'title'),
+        array('data' => t('Caller'), 'field' => 'caller'),
+        array('data' => t('Priority'), 'field' => 'priority'),
+        array('data' => t('State'), 'field' => 'state'),
+        array('data' => t('Date'), 'field' => 'date', 'sort' => 'DESC'),
+        array('data' => t('Created by'), 'field' => 'creator')
+    );
+
+    $query = db_select('helpdesk_ticket', 't')
+        ->extend('TableSort');
     
     $query->join('node', 'n', 't.nid = n.nid');
     $query->join('users', 'u', 'n.uid = u.uid');
@@ -321,10 +331,11 @@ function helpdesk_tickets_list_page() {
     $query->addField('s', 'state', 'state');
     $query->addField('c', 'name', 'caller');
 
+    $query->orderByHeader($header);
+
     $result = $query->execute();
 
     $rows = array();
-    $header = array('Issue', 'Caller', 'Priority', 'State', 'Date', 'Created by');
 
     foreach ($result as $record) {
         $rows[] = array($record->title, $record->caller, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
