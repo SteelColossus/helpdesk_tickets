@@ -316,7 +316,9 @@ function helpdesk_tickets_list_page() {
     );
 
     $query = db_select('helpdesk_ticket', 't')
-        ->extend('TableSort');
+        ->extend('PagerDefault')
+        ->extend('TableSort')
+        ->limit(20);
     
     $query->join('node', 'n', 't.nid = n.nid');
     $query->join('users', 'u', 'n.uid = u.uid');
