@@ -135,7 +135,8 @@ function _helpdesk_ticket_merge($node) {
         ->fields(array(
             'nid' => $node->nid,
             'priority' => $node->priority,
-            'state' => $node->state
+            'state' => $node->state,
+            'cid' => $node->cid
         ))
         ->execute();
 }
