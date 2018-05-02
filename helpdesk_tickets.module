@@ -74,9 +74,9 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#required' => TRUE
     );
 
-    if (isset($node->cid))
+    if (isset($node->caller))
     {
-        $form['caller']['#default_value'] = $node->cid;
+        $form['caller']['#default_value'] = $node->caller;
     }
 
     return $form;
