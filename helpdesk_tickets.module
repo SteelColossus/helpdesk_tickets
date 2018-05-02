@@ -29,7 +29,7 @@ function helpdesk_ticket_load($nodes) {
     foreach ($result as $record) {
         $nodes[$record->nid]->priority = $record->priority;
         $nodes[$record->nid]->state = $record->state;
-        $nodes[$record->nid]->cid = $record->cid;
+        $nodes[$record->nid]->caller = $record->cid;
     }
 }
 
