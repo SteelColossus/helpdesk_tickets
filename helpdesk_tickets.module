@@ -24,11 +24,12 @@ function helpdesk_tickets_node_info() {
  * Node-type specific.
  */
 function helpdesk_ticket_load($nodes) {
-    $result = db_query('SELECT nid, priority, state FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
+    $result = db_query('SELECT nid, priority, state, cid FROM {helpdesk_ticket} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
 
     foreach ($result as $record) {
         $nodes[$record->nid]->priority = $record->priority;
         $nodes[$record->nid]->state = $record->state;
+        $nodes[$record->nid]->cid = $record->cid;
     }
 }
 
@@ -48,6 +49,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#title' => t('Priority'),
         '#options' => $priorities,
         '#description' => t('Select how urgent this issue is.'),
+        '#required' => TRUE,
         '#default_value' => isset($node->priority) ? $node->priority : 2
     );
 
@@ -58,6 +60,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#title' => t('State'),
         '#options' => $states,
         '#description' => t('Select what state this issue is in.'),
+        '#required' => TRUE,
         '#default_value' => isset($node->state) ? $node->state : 1
     );
 
@@ -67,8 +70,14 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#type' => 'select',
         '#title' => t('Caller'),
         '#options' => $callers,
-        '#description' => t('Select the name of the person who called in with this issue.')
+        '#description' => t('Select the name of the person who called in with this issue.'),
+        '#required' => TRUE
     );
+
+    if (isset($node->cid))
+    {
+        $form['caller']['#default_value'] = $node->cid;
+    }
 
     return $form;
 }
