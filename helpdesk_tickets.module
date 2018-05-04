@@ -35,6 +35,7 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->state = $record->state;
         $nodes[$record->nid]->caller = $record->cid;
         $nodes[$record->nid]->problem = $record->problem;
+        $nodes[$record->nid]->specialist = $record->specialist;
     }
 }
 
@@ -149,6 +150,19 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#type' => 'item',
         '#title' => t('Type of problem'),
         '#markup' => $problem_type_text
+    );
+
+    $specialist_text = t('None');
+
+    if ($node->specialist !== NULL)
+    {
+        $specialist_text = t(_get_user_name($node->specialist));
+    }
+
+    $node->content['specialist'] = array(
+        '#type' => 'item',
+        '#title' => t('Assigned specialist'),
+        '#markup' => $specialist_text
     );
 
     return $node;
@@ -448,6 +462,18 @@ function _get_problem_type_name($pid) {
     $query = db_select('helpdesk_problem_type', 'p')
         ->fields('p', array('problem'))
         ->condition('pid', $pid, '=');
+
+    $result = $query->execute();
+    return $result->fetchField();
+}
+
+/**
+ * Helper function to get the name of a user given their unique id.
+ */
+function _get_user_name($uid) {
+    $query = db_select('users', 'u')
+        ->fields('u', array('name'))
+        ->condition('uid', $uid, '=');
 
     $result = $query->execute();
     return $result->fetchField();
