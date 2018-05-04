@@ -429,7 +429,7 @@ function _get_caller_name($cid) {
  */
 function _get_problem_type_name($pid) {
     $query = db_select('helpdesk_problem_type', 'p')
-        ->fields('p', array('name'))
+        ->fields('p', array('problem'))
         ->condition('pid', $pid, '=');
 
     $result = $query->execute();
