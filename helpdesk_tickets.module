@@ -518,14 +518,14 @@ function _get_full_problem_type_list() {
  */
 function _get_full_specialists_list() {
     $specialists = array();
-    $rid = user_role_load_by_name('specialist');
+    $role = user_role_load_by_name('specialist');
 
     $query = db_select('users', 'u');
 
     $query->join('users_roles', 'ur', 'u.uid = ur.uid');
 
     $result = $query->fields('u', array('uid', 'name'))
-        ->condition('ur.rid', $rid, '=')
+        ->condition('ur.rid', $role->rid, '=')
         ->execute();
 
     foreach ($result as $specialist) {
