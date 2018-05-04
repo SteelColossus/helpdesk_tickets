@@ -237,11 +237,9 @@ function helpdesk_tickets_install() {
     // Add new roles to site
     $newRoles = array('operator', 'specialist');
   
-    foreach ($newRoles as $r)
-    {
+    foreach ($newRoles as $r) {
         // Check if role with that name exists
-        if (!user_role_load_by_name($r))
-        {
+        if (!user_role_load_by_name($r)) {
             $role = new stdClass();
             $role->name = $r;
             user_role_save($role);

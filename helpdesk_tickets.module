@@ -413,75 +413,57 @@ function helpdesk_tickets_list_page() {
 }
 
 /**
- * Helper function to get the title of a helpdesk ticket given its node id.
+ * Helper function to get a single record by a particular attribute.
  */
-function _get_ticket_title($nid) {
-    $result = db_select('node', 'n')
-        ->fields('n', array('title'))
-        ->condition('nid', $nid, '=')
+function _get_record_by_attribute($table, $field, $value, $return_fields) {
+    $result = db_select($table, 't')
+        ->fields('t', $return_fields)
+        ->condition($field, $value, '=')
         ->execute();
 
     return $result->fetchField();
+}
+
+/**
+ * Helper function to get the title of a helpdesk ticket given its node id.
+ */
+function _get_ticket_title($nid) {
+    return _get_record_by_attribute('node', 'nid', $nid, array('title'));
 }
 
 /**
  * Helper function to get the name of a priority given its unique id.
  */
 function _get_priority_name($pid) {
-    $result = db_select('helpdesk_priority', 'p')
-        ->fields('p', array('priority'))
-        ->condition('pid', $pid, '=')
-        ->execute();
-
-    return $result->fetchField();
+    return _get_record_by_attribute('helpdesk_priority', 'pid', $pid, array('priority'));
 }
 
 /**
  * Helper function to get the name of a state given its unique id.
  */
 function _get_state_name($sid) {
-    $result = db_select('helpdesk_state', 's')
-        ->fields('s', array('state'))
-        ->condition('sid', $sid, '=')
-        ->execute();
-
-    return $result->fetchField();
+    return _get_record_by_attribute('helpdesk_state', 'sid', $sid, array('state'));
 }
 
 /**
  * Helper function to get the name of a caller given their unique id.
  */
 function _get_caller_name($cid) {
-    $result = db_select('helpdesk_caller', 'c')
-        ->fields('c', array('name'))
-        ->condition('cid', $cid, '=')
-        ->execute();
-
-    return $result->fetchField();
+    return _get_record_by_attribute('helpdesk_caller', 'cid', $cid, array('name'));
 }
 
 /**
  * Helper function to get the name of a problem type given its unique id.
  */
 function _get_problem_type_name($pid) {
-    $result = db_select('helpdesk_problem_type', 'p')
-        ->fields('p', array('problem'))
-        ->condition('pid', $pid, '=')
-        ->execute();
-
-    return $result->fetchField();
+    return _get_record_by_attribute('helpdesk_problem_type', 'pid', $pid, array('problem'));
 }
 
 /**
  * Helper function to get the name of a user given their unique id.
  */
 function _get_user_name($uid) {
-    $result = db_select('users', 'u')
-        ->fields('u', array('name'))
-        ->condition('uid', $uid, '=')
-        ->execute();
-        
-    return $result->fetchField();
+    return _get_record_by_attribute('users', 'uid', $uid, array('name'));
 }
 
 /**
