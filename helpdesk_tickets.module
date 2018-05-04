@@ -105,7 +105,9 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#type' => 'select',
         '#title' => t('Specialist'),
         '#options' => $specialists,
-        '#description' => t('Select a specialist to be assigned to this issue.')
+        '#description' => t('Select a specialist to be assigned to this issue.'),
+        '#required' => FALSE,
+        '#empty_option' => t('Unassigned')
     );
 
     return $form;
