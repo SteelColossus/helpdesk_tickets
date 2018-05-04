@@ -45,6 +45,12 @@ function helpdesk_tickets_schema() {
                 'type' => 'int',
                 'unsigned' => TRUE,
                 'not null' => TRUE
+            ),
+            'specialist' => array(
+                'description' => 'The user id of the specialist assigned to this issue.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
             )
         ),
         // Used for documentation only.

@@ -184,7 +184,8 @@ function _helpdesk_ticket_merge($node) {
             'priority' => $node->priority,
             'state' => $node->state,
             'cid' => $node->caller,
-            'problem' => $node->problem
+            'problem' => $node->problem,
+            'specialist' => $node->specialist
         ))
         ->execute();
 }
