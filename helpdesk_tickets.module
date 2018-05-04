@@ -99,6 +99,15 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['problem']['#default_value'] = $node->problem;
     }
 
+    $specialists = _get_full_specialists_list();
+
+    $form['specialist'] = array(
+        '#type' => 'select',
+        '#title' => t('Specialist'),
+        '#options' => $specialists,
+        '#description' => t('Select a specialist to be assigned to this issue.')
+    );
+
     return $form;
 }
 
@@ -502,4 +511,26 @@ function _get_full_problem_type_list() {
     }
 
     return $problem_types;
+}
+
+/**
+ * Helper function to get the list of all specialists mapped with unique id and user name.
+ */
+function _get_full_specialists_list() {
+    $specialists = array();
+    $rid = user_role_load_by_name('specialist');
+
+    $query = db_select('users', 'u');
+
+    $query->join('users_roles', 'ur', 'u.uid = ur.uid');
+
+    $result = $query->fields('u', array('uid', 'name'))
+        ->condition('ur.rid', $rid, '=')
+        ->execute();
+
+    foreach ($result as $specialist) {
+        $specialists[$specialist->uid] = $specialist->name;
+    }
+
+    return $specialists;
 }
