@@ -228,6 +228,20 @@ function helpdesk_tickets_install() {
     node_types_rebuild();
     $types = node_type_get_types();
     node_add_body_field($types['helpdesk_ticket']);
+
+    // Add new roles to site
+    $newRoles = array('operator', 'specialist');
+  
+    foreach ($newRoles as $r)
+    {
+        // Check if role with that name exists
+        if (!user_role_load_by_name($r))
+        {
+            $role = array();
+            $role->name = $r;
+            user_role_save($role);
+        }
+    }
 }
 
 /**
