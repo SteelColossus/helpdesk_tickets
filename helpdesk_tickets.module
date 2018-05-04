@@ -407,7 +407,12 @@ function helpdesk_tickets_list_page() {
         $rows[] = array($record->title, $record->caller, $record->problem, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
     }
 
-    $output = theme('table', array('header' => $header, 'rows' => $rows));
+    $output = 'No tickets have been added yet.';
+
+    if (count($rows) > 0)
+    {
+        $output = theme('table', array('header' => $header, 'rows' => $rows));
+    }
 
     return $output;
 }
