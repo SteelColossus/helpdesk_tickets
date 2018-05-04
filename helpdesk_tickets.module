@@ -176,6 +176,11 @@ function helpdesk_ticket_update($node) {
  * Helper function for inserting or updating a node.
  */
 function _helpdesk_ticket_merge($node) {
+    if ($node->specialist === '')
+    {
+        $node->specialist = NULL;
+    }
+
     // Add or update the ticket
     db_merge('helpdesk_ticket')
         ->key(array('nid' => $node->nid))
