@@ -237,7 +237,7 @@ function helpdesk_tickets_install() {
         // Check if role with that name exists
         if (!user_role_load_by_name($r))
         {
-            $role = array();
+            $role = new stdClass();
             $role->name = $r;
             user_role_save($role);
         }
