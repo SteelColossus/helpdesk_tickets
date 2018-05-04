@@ -216,7 +216,7 @@ function helpdesk_tickets_install() {
         )
     );
 
-    $query = db_insert('helpdesk_problemtype')->fields(array('problem'));
+    $query = db_insert('helpdesk_problem_type')->fields(array('problem'));
 
     foreach ($problem_values as $record) {
         $query->values($record);
