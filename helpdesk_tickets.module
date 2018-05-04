@@ -498,7 +498,7 @@ function _get_full_problem_type_list() {
         ->execute();
 
     foreach ($result as $problem_type) {
-        $problem_types[$problem_type->pid] = $problem_type->name;
+        $problem_types[$problem_type->pid] = $problem_type->problem;
     }
 
     return $problem_types;
