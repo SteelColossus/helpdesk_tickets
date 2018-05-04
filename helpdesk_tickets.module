@@ -25,7 +25,7 @@ function helpdesk_tickets_node_info() {
  */
 function helpdesk_ticket_load($nodes) {
     $query = db_select('helpdesk_ticket', 't')
-        ->fields('t', array('nid', 'priority', 'state', 'cid'))
+        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem'))
         ->condition('nid', array_keys($nodes), 'IN');
 
     $result = $query->execute();
@@ -34,6 +34,7 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->priority = $record->priority;
         $nodes[$record->nid]->state = $record->state;
         $nodes[$record->nid]->caller = $record->cid;
+        $nodes[$record->nid]->problem = $record->problem;
     }
 }
 
@@ -83,6 +84,21 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['caller']['#default_value'] = $node->caller;
     }
 
+    $problem_types = _get_full_problem_type_list();
+
+    $form['problem'] = array(
+        '#type' => 'select',
+        '#title' => t('Type of problem'),
+        '#options' => $problem_types,
+        '#description' => t('Select what the caller is having an issue with.'),
+        '#required' => TRUE
+    );
+
+    if (isset($node->problem))
+    {
+        $form['problem']['#default_value'] = $node->problem;
+    }
+
     return $form;
 }
 
@@ -114,6 +130,14 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#type' => 'item',
         '#title' => t('Caller'),
         '#markup' => $caller_text
+    );
+
+    $problem_type_text = t(_get_problem_type_name($node->problem));
+
+    $node->content['problem'] = array(
+        '#type' => 'item',
+        '#title' => t('Type of problem'),
+        '#markup' => $problem_type_text
     );
 
     return $node;
@@ -148,7 +172,8 @@ function _helpdesk_ticket_merge($node) {
             'nid' => $node->nid,
             'priority' => $node->priority,
             'state' => $node->state,
-            'cid' => $node->caller
+            'cid' => $node->caller,
+            'problem' => $node->problem
         ))
         ->execute();
 }
@@ -309,6 +334,7 @@ function helpdesk_tickets_list_page() {
     $header = array(
         array('data' => t('Issue'), 'field' => 'title'),
         array('data' => t('Caller'), 'field' => 'caller'),
+        array('data' => t('Type of problem'), 'field' => 'problem'),
         array('data' => t('Priority'), 'field' => 'priority'),
         array('data' => t('State'), 'field' => 'state'),
         array('data' => t('Date'), 'field' => 'date', 'sort' => 'desc'),
@@ -325,6 +351,7 @@ function helpdesk_tickets_list_page() {
     $query->join('helpdesk_priority', 'p', 't.priority = p.pid');
     $query->join('helpdesk_state', 's', 't.state = s.sid');
     $query->join('helpdesk_caller', 'c', 't.cid = c.cid');
+    $query->join('helpdesk_problem_type', 'pt', 't.problem = pt.pid');
 
     $query->addField('n', 'title', 'title');
     $query->addField('n', 'created', 'date');
@@ -332,6 +359,7 @@ function helpdesk_tickets_list_page() {
     $query->addField('p', 'priority', 'priority');
     $query->addField('s', 'state', 'state');
     $query->addField('c', 'name', 'caller');
+    $query->addField('pt', 'problem', 'problem');
 
     $query->orderByHeader($header);
 
@@ -340,7 +368,7 @@ function helpdesk_tickets_list_page() {
     $rows = array();
 
     foreach ($result as $record) {
-        $rows[] = array($record->title, $record->caller, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
+        $rows[] = array($record->title, $record->caller, $record->problem, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
     }
 
     $output = theme('table', array('header' => $header, 'rows' => $rows));
@@ -397,6 +425,18 @@ function _get_caller_name($cid) {
 }
 
 /**
+ * Helper function to get the name of a problem type given its unique id.
+ */
+function _get_problem_type_name($pid) {
+    $query = db_select('helpdesk_problem_type', 'p')
+        ->fields('p', array('name'))
+        ->condition('pid', $pid, '=');
+
+    $result = $query->execute();
+    return $result->fetchField();
+}
+
+/**
  * Helper function to get the list of all priorities mapped with unique id and name.
  */
 function _get_full_priority_list() {
@@ -445,4 +485,21 @@ function _get_full_caller_list() {
     }
 
     return $callers;
+}
+
+/**
+ * Helper function to get the list of all problem types mapped with unique id and name.
+ */
+function _get_full_problem_type_list() {
+    $problem_types = array();
+
+    $result = db_select('helpdesk_problem_type', 'p')
+        ->fields('p', array('pid', 'problem'))
+        ->execute();
+
+    foreach ($result as $problem_type) {
+        $problem_types[$problem_type->pid] = $problem_type->name;
+    }
+
+    return $problem_types;
 }

@@ -39,6 +39,12 @@ function helpdesk_tickets_schema() {
                 'type' => 'int',
                 'unsigned' => TRUE,
                 'not null' => TRUE
+            ),
+            'problem' => array(
+                'description' => 'A type of problem, e.g. mouse or email.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
             )
         ),
         // Used for documentation only.
@@ -91,6 +97,25 @@ function helpdesk_tickets_schema() {
         'primary key' => array('sid')
     );
 
+    $schema['helpdesk_problem_type'] = array(
+        'description' => 'Stores all the different types of problem an employee could be having.',
+        'fields' => array(
+            'pid' => array(
+                'description' => 'The primary identifier for a problem type.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'problem' => array(
+                'description' => 'A type of problem, e.g. mouse or email.',
+                'type' => 'varchar',
+                'length' => 32,
+                'not null' => TRUE
+            )
+        ),
+        'primary key' => array('pid')
+    );
+
     $schema['helpdesk_caller'] = array(
         'description' => 'Stores the company employees that call in with problems.',
         'fields' => array(
@@ -122,8 +147,6 @@ function helpdesk_tickets_schema() {
         'primary key' => array('cid')
     );
     
-    
-
     return $schema;
 }
 
@@ -166,6 +189,36 @@ function helpdesk_tickets_install() {
     $query = db_insert('helpdesk_state')->fields(array('state'));
 
     foreach ($state_values as $record) {
+        $query->values($record);
+    }
+
+    $query->execute();
+
+    // Add some default problem types
+    $problem_values = array(
+        array(
+            'problem' => 'Monitor'
+        ),
+        array(
+            'problem' => 'Keyboard'
+        ),
+        array(
+            'problem' => 'Mouse'
+        ),
+        array(
+            'problem' => 'Internet Connection'
+        ),
+        array(
+            'problem' => 'Email'
+        ),
+        array(
+            'problem' => 'Website'
+        )
+    );
+
+    $query = db_insert('helpdesk_problemtype')->fields(array('problem'));
+
+    foreach ($problem_values as $record) {
         $query->values($record);
     }
 
