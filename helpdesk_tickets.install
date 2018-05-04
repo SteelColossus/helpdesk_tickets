@@ -151,6 +151,40 @@ function helpdesk_tickets_schema() {
         ),
         'primary key' => array('cid')
     );
+
+    $schema['helpdesk_expertises'] = array(
+        'description' => 'Stores the problem types that specialists are experts at.',
+        'fields' => array(
+            'specialist' => array(
+                'description' => 'The user id of a specialist.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'problem' => array(
+                'description' => 'The primary identifier for a problem type.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            )
+        ),
+        // Used for documentation only.
+        'foreign keys' => array(
+            'fk_specialist_id' => array(
+                'table' => 'users',
+                'columns' => array(
+                    'uid' => 'specialist'
+                )
+            ),
+            'fk_problem_type_id' => array(
+                'table' => 'helpdesk_problem_type',
+                'columns' => array(
+                    'pid' => 'problem'
+                )
+            )
+        ),
+        'primary key' => array('specialist', 'problem')  
+    );
     
     return $schema;
 }
