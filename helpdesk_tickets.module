@@ -246,27 +246,58 @@ function helpdesk_tickets_menu() {
             'access arguments' => array('administer helpdesk_tickets'),
             'file' => 'helpdesk_tickets.admin.inc',
         ),
-        'admin/helpdesk_tickets/tab1' => array(
-            'title' => 'Helpdesk Client Settings',
-            'type' => MENU_DEFAULT_LOCAL_TASK,
-            'description' => 'Configure the helpdesk ticketing system.',
-            'position' => 'right',
-            'weight' => 5,
-            'page callback' => 'helpdesk_tickets_admin_menu_block_page',
+        'admin/helpdesk_tickets/client' => array(
+            'title' => 'Clients',
+            'type' => MENU_LOCAL_TASK,
             'access arguments' => array('administer helpdesk_tickets'),
-            'file' => 'helpdesk_tickets.admin.inc',
         ),
-        'admin/helpdesk_tickets/tab2' => array(
-            'title' => 'Add Helpdesk Clients',
+        'admin/helpdesk_tickets/client/add' => array(
+            'title' => 'Add Clients',
             'type' => MENU_LOCAL_TASK,
             'page callback' => 'drupal_get_form',
             'page arguments' => array('helpdesk_client_form'),
             'access arguments' => array('administer helpdesk_tickets'),
         ),
-        'admin/helpdesk_tickets/tab3' => array(
+        'admin/helpdesk_tickets/client/view' => array(
             'title' => 'Helpdesk Client List',
             'type' => MENU_LOCAL_TASK,
             'page callback' => 'helpdesk_client_submissions',
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/hardware' => array(
+            'title' => 'Hardware',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/hardware/add' => array(
+            'title' => 'Add Hardware',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_hardware_form'),
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/hardware/view' => array(
+            'title' => 'Hardware List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_hardware_submissions',
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/software' => array(
+            'title' => 'Software',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/software/add' => array(
+            'title' => 'Add Software',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_software_form'),
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/software/view' => array(
+            'title' => 'Software List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_software_submissions',
             'access arguments' => array('administer helpdesk_tickets'),
         ),
     );
@@ -293,6 +324,7 @@ function helpdesk_client_form($form, &$form_state){
         '#maxlength' => 128,  
         '#required' => TRUE,
     );
+    
     $form['helpdesk_tickets_client_ext_no'] = array(
         '#type' => 'textfield', 
         '#title' => t("Client's Extension Number"), 
@@ -301,6 +333,7 @@ function helpdesk_client_form($form, &$form_state){
         '#maxlength' => 128,  
         '#required' => TRUE,
     );
+    
     $form['helpdesk_tickets_client_dept'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client Department'), 
@@ -361,6 +394,140 @@ function helpdesk_tickets_permission() {
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
     );
+}
+
+/**
+*  Administration form for Helpdesk Hardware
+*/
+function helpdesk_hardware_form($form, &$form_state){
+    /**$form['helpdesk_tickets_client_id'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Client ID'), 
+        '#default_value' => variable_get('client_id', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+        '#required' => TRUE,
+    );*/
+    $form['helpdesk_tickets_hardware_name'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Hardware Name'), 
+        '#default_value' => variable_get('hardware_name', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
+    );
+    $form['helpdesk_tickets_hardware_serial_no'] = array(
+        '#type' => 'textfield', 
+        '#title' => t("hardware's Serial Number"), 
+        '#default_value' => variable_get('hardware_serial_no', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add Hardware'),
+    );
+    return $form;
+}
+
+function helpdesk_hardware_form_validate($form, &$form_state) {
+    return TRUE;
+}
+
+function helpdesk_hardware_form_submit($form, &$form_state){
+    $cid = db_insert('helpdesk_hardware')
+        ->fields(array(
+            'name' => $form_state['values']['helpdesk_tickets_hardware_name'],
+            'serial_no' => $form_state['values']['helpdesk_tickets_hardware_serial_no'],
+        ))
+        ->execute();
+
+    drupal_set_message(t('Your form entry has been added.'));
+}
+
+function helpdesk_hardware_submissions(){
+    $results = db_query("SELECT * FROM {helpdesk_hardware}");
+    
+    $header = array(t('Name'), t('Serial No'));
+    $rows = array();
+    
+    foreach($results AS $result){
+        $rows[] = array(
+            $result->name,
+            $result->serial_no,
+        );
+    }
+    
+    return theme('table', array('header' => $header, 'rows' => $rows));
+}
+
+/**
+*  Administration form for Helpdesk Clients
+*/
+function helpdesk_software_form($form, &$form_state){
+    /**$form['helpdesk_tickets_client_id'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Client ID'), 
+        '#default_value' => variable_get('client_id', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+        '#required' => TRUE,
+    );*/
+    $form['helpdesk_tickets_software_name'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Software Name'), 
+        '#default_value' => variable_get('software_name', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
+    );
+    $form['helpdesk_tickets_software_serial_no'] = array(
+        '#type' => 'textfield', 
+        '#title' => t("software's Serial Number"), 
+        '#default_value' => variable_get('software_serial_no', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add Software'),
+    );
+    return $form;
+}
+
+function helpdesk_software_form_validate($form, &$form_state) {
+    return TRUE;
+}
+
+function helpdesk_software_form_submit($form, &$form_state){
+    $cid = db_insert('helpdesk_software')
+        ->fields(array(
+            'name' => $form_state['values']['helpdesk_tickets_software_name'],
+            'serial_no' => $form_state['values']['helpdesk_tickets_software_serial_no'],
+        ))
+        ->execute();
+
+    drupal_set_message(t('Your form entry has been added.'));
+}
+
+function helpdesk_software_submissions(){
+    $results = db_query("SELECT * FROM {helpdesk_software}");
+    
+    $header = array(t('Name'), t('Serial No'));
+    $rows = array();
+    
+    foreach($results AS $result){
+        $rows[] = array(
+            $result->name,
+            $result->serial_no,
+        );
+    }
+    
+    return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
 /**

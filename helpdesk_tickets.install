@@ -151,6 +151,56 @@ function helpdesk_tickets_schema() {
         ),
         'primary key' => array('cid')
     );
+    
+    $schema['helpdesk_hardware'] = array(
+        'description' => 'Stores information about the hardware.',
+        'fields' => array(
+            'hid' => array(
+                'description' => 'The primary identifier for a caller.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'name' => array(
+                'description' => 'The full name of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
+            'serial_no' => array(
+                'description' => 'The extension number of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
+        ),
+        'primary key' => array('hid')
+    );
+    
+    $schema['helpdesk_software'] = array(
+        'description' => 'Stores information about the hardware.',
+        'fields' => array(
+            'sid' => array(
+                'description' => 'The primary identifier for a caller.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'name' => array(
+                'description' => 'The full name of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
+            'serial_no' => array(
+                'description' => 'The extension number of a caller.',
+                'type' => 'varchar',
+                'length' => 64,
+                'not null' => TRUE
+            ),
+        ),
+        'primary key' => array('sid')
+    );
 
     $schema['helpdesk_expertises'] = array(
         'description' => 'Stores the problem types that specialists are experts at.',
