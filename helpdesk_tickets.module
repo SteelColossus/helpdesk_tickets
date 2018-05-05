@@ -237,6 +237,18 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_tickets_list_page',
             'access callback' => TRUE
         ),
+        'hardware_list' => array(
+            'title' => 'Hardware Overview',
+            'type' => MENU_NORMAL_ITEM,
+            'page callback' => 'helpdesk_hardware_submissions',
+            'access callback' => TRUE
+        ),
+        'software_list' => array(
+            'title' => 'Software Overview',
+            'type' => MENU_NORMAL_ITEM,
+            'page callback' => 'helpdesk_software_submissions',
+            'access callback' => TRUE
+        ),
         'admin/helpdesk_tickets' => array(
             'title' => 'Helpdesk Ticketing System',
             'description' => 'Configure the helpdesk ticketing system.',
@@ -300,6 +312,25 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_software_submissions',
             'access arguments' => array('administer helpdesk_tickets'),
         ),
+        'admin/helpdesk_tickets/problem_type' => array(
+            'title' => 'Problem Type',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/problem_type/add' => array(
+            'title' => 'Add Problem Type',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_problem_type_form'),
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/problem_type/view' => array(
+            'title' => 'Problem Type List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_problem_type_submissions',
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        
     );
     return $items;
 }
@@ -418,7 +449,7 @@ function helpdesk_hardware_form($form, &$form_state){
     );
     $form['helpdesk_tickets_hardware_serial_no'] = array(
         '#type' => 'textfield', 
-        '#title' => t("hardware's Serial Number"), 
+        '#title' => t("Hardware's Serial Number"), 
         '#default_value' => variable_get('hardware_serial_no', ''), 
         '#size' => 60, 
         '#maxlength' => 128,  
@@ -485,7 +516,7 @@ function helpdesk_software_form($form, &$form_state){
     );
     $form['helpdesk_tickets_software_serial_no'] = array(
         '#type' => 'textfield', 
-        '#title' => t("software's Serial Number"), 
+        '#title' => t("Software's Serial Number"), 
         '#default_value' => variable_get('software_serial_no', ''), 
         '#size' => 60, 
         '#maxlength' => 128,  
@@ -529,6 +560,61 @@ function helpdesk_software_submissions(){
     
     return theme('table', array('header' => $header, 'rows' => $rows));
 }
+
+function helpdesk_problem_type_form($form, &$form_state){
+    /**$form['helpdesk_tickets_client_id'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Client ID'), 
+        '#default_value' => variable_get('client_id', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128, 
+        '#required' => TRUE,
+    );*/
+    $form['helpdesk_tickets_problem_type_name'] = array(
+        '#type' => 'textfield', 
+        '#title' => t('Software Name'), 
+        '#default_value' => variable_get('software_name', ''), 
+        '#size' => 60, 
+        '#maxlength' => 128,  
+        '#required' => TRUE,
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add Problem Type'),
+    );
+    return $form;
+}
+
+function helpdesk_problem_type_form_validate($form, &$form_state) {
+    return TRUE;
+}
+
+function helpdesk_problem_type_form_submit($form, &$form_state){
+    $cid = db_insert('helpdesk_problem_type')
+        ->fields(array(
+            'problem' => $form_state['values']['helpdesk_tickets_problem_type_name'],
+        ))
+        ->execute();
+
+    drupal_set_message(t('Your form entry has been added.'));
+}
+
+function helpdesk_problem_type_submissions(){
+    $results = db_query("SELECT * FROM {helpdesk_problem_type}");
+    
+    $header = array(t('Problem Type'));
+    $rows = array();
+    
+    foreach($results AS $result){
+        $rows[] = array(
+            $result->problem,
+        );
+    }
+    
+    return theme('table', array('header' => $header, 'rows' => $rows));
+}
+
 
 /**
  * Defines how the ticket list page will look like.
