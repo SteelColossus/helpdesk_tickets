@@ -572,7 +572,7 @@ function helpdesk_problem_type_form($form, &$form_state){
     );*/
     $form['helpdesk_tickets_problem_type_name'] = array(
         '#type' => 'textfield', 
-        '#title' => t('Software Name'), 
+        '#title' => t('Problem Type'), 
         '#default_value' => variable_get('software_name', ''), 
         '#size' => 60, 
         '#maxlength' => 128,  
