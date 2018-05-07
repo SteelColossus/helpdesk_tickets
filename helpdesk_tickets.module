@@ -144,6 +144,52 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['specialist']['#default_value'] = $node->specialist;
     }
 
+    $form['hardware'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Hardware'),
+        '#collapsible' => TRUE
+    );
+    
+    $form['hardware']['hardware_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#size' => 32
+    );
+
+    $form['hardware']['hardware_serial_no'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Serial number'),
+        '#size' => 64
+    );
+
+    $form['hardware']['add_hardware_button'] = array(
+        '#type' => 'button',
+        '#value' => t('Add hardware')
+    );
+
+    $form['software'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Software'),
+        '#collapsible' => TRUE
+    );
+    
+    $form['software']['software_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#size' => 32
+    );
+
+    $form['software']['software_serial_no'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Serial number'),
+        '#size' => 64
+    );
+
+    $form['software']['add_software_button'] = array(
+        '#type' => 'button',
+        '#value' => t('Add software')
+    );
+
     $form['notes'] = array(
         '#type' => 'textarea',
         '#title' => t('Notes'),
