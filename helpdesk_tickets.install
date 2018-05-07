@@ -50,6 +50,11 @@ function helpdesk_tickets_schema() {
                 'description' => 'The user id of the specialist assigned to this issue.',
                 'type' => 'int',
                 'unsigned' => TRUE
+            ),
+            'notes' => array(
+                'description' => 'Any additional notes for this ticket.',
+                'type' => 'text',
+                'length' => 255
             )
         ),
         // Used for documentation only.
@@ -312,11 +317,6 @@ function helpdesk_tickets_install() {
     }
 
     $query->execute();
-
-    // Add body field to helpdesk_ticket type
-    node_types_rebuild();
-    $types = node_type_get_types();
-    node_add_body_field($types['helpdesk_ticket']);
 
     // Add new roles to site
     $newRoles = array('operator', 'specialist');

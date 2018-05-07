@@ -25,7 +25,7 @@ function helpdesk_tickets_node_info() {
  */
 function helpdesk_ticket_load($nodes) {
     $query = db_select('helpdesk_ticket', 't')
-        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist'))
+        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist', 'notes'))
         ->condition('nid', array_keys($nodes), 'IN');
 
     $result = $query->execute();
@@ -36,6 +36,7 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->caller = $record->cid;
         $nodes[$record->nid]->problem = $record->problem;
         $nodes[$record->nid]->specialist = $record->specialist;
+        $nodes[$record->nid]->notes = $record->notes;
     }
 }
 
@@ -51,7 +52,7 @@ function helpdesk_ticket_form($node, &$form_state) {
     $form['title'] = array(
         '#type' => 'textfield',
         '#title' => t('Reason for call'),
-        '#description' => 'The issue that caused the person to call in.',
+        '#description' => t('The issue that caused the person to call in.'),
         '#required' => TRUE
     );
 
@@ -123,6 +124,18 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['specialist']['#default_value'] = $node->specialist;
     }
 
+    $form['notes'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Notes'),
+        '#description' => t('Any addtional notes for this ticket.'),
+        '#required' => FALSE
+    );
+
+    if (isset($node->notes))
+    {
+        $form['notes']['#default_value'] = $node->notes;
+    }
+
     return $form;
 }
 
@@ -177,6 +190,12 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $specialist_text
     );
 
+    $node->content['notes'] = array(
+        '#type' => 'item',
+        '#title' => t('Notes'),
+        '#markup' => $node->notes
+    );
+
     return $node;
 }
 
@@ -216,7 +235,8 @@ function _helpdesk_ticket_merge($node) {
             'state' => $node->state,
             'cid' => $node->caller,
             'problem' => $node->problem,
-            'specialist' => $node->specialist
+            'specialist' => $node->specialist,
+            'notes' => $node->notes
         ))
         ->execute();
 }
