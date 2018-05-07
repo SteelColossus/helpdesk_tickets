@@ -46,7 +46,14 @@ function helpdesk_ticket_load($nodes) {
  */
 function helpdesk_ticket_form($node, &$form_state) {
     // Get the default implementation of hook_form()
-    $form = node_content_form($node, $form_state);
+    $form = array();
+    
+    $form['title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Reason for call'),
+        '#description' => 'The issue that caused the person to call in.',
+        '#required' => TRUE
+    );
 
     $priorities = _get_full_priority_list();
 
