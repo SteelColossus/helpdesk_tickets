@@ -94,7 +94,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['caller_container']['new_caller_link'] = array(
         '#type' => 'markup',
-        '#markup' => l(t('Add caller'), 'admin/helpdesk_tickets/client/add')
+        '#markup' => l(t('Add a new caller'), 'admin/helpdesk_tickets/client/add')
     );
 
     if (isset($node->caller))
@@ -104,7 +104,11 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $problem_types = _get_full_problem_type_list();
 
-    $form['problem'] = array(
+    $form['problem_container'] = array(
+        '#type' => 'container'
+    );
+
+    $form['problem_container']['problem'] = array(
         '#type' => 'select',
         '#title' => t('Type of problem'),
         '#options' => $problem_types,
@@ -114,8 +118,13 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     if (isset($node->problem))
     {
-        $form['problem']['#default_value'] = $node->problem;
+        $form['problem_container']['problem']['#default_value'] = $node->problem;
     }
+
+    $form['problem_container']['new_problem_link'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Add a new problem type'), 'admin/helpdesk_tickets/problem_type/add')
+    );
 
     $specialists = _get_full_specialists_list();
 
@@ -199,11 +208,14 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $specialist_text
     );
 
-    $node->content['notes'] = array(
-        '#type' => 'item',
-        '#title' => t('Notes'),
-        '#markup' => $node->notes
-    );
+    if ($node->notes !== NULL)
+    {
+        $node->content['notes'] = array(
+            '#type' => 'item',
+            '#title' => t('Notes'),
+            '#markup' => $node->notes
+        );
+    }
 
     return $node;
 }
