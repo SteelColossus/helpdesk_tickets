@@ -88,6 +88,11 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#required' => TRUE
     );
 
+    $form['new_caller_link'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Add caller'), 'admin/helpdesk_tickets/client/add')
+    );
+
     if (isset($node->caller))
     {
         $form['caller']['#default_value'] = $node->caller;
