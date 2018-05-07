@@ -69,11 +69,12 @@ function helpdesk_ticket_form($node, &$form_state) {
     );
 
     $states = _get_full_state_list();
+    $open_key = array_search('open', $states);
 
     $form['state'] = array(
         '#type' => 'select',
         '#title' => t('State'),
-        '#options' => $states,
+        '#options' => isset($node->state) ? $states : array($open_key => $states[$open_key]),
         '#description' => t('Select what state this issue is in.'),
         '#required' => TRUE,
         '#default_value' => isset($node->state) ? $node->state : 1
