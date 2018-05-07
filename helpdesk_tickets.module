@@ -208,7 +208,7 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $specialist_text
     );
 
-    if ($node->notes !== NULL)
+    if ($node->notes !== '')
     {
         $node->content['notes'] = array(
             '#type' => 'item',
