@@ -53,7 +53,8 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#type' => 'textfield',
         '#title' => t('Reason for call'),
         '#description' => t('The issue that caused the person to call in.'),
-        '#required' => TRUE
+        '#required' => TRUE,
+        '#default_value' => $node->title
     );
 
     $priorities = _get_full_priority_list();
@@ -99,7 +100,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     if (isset($node->caller))
     {
-        $form['caller']['#default_value'] = $node->caller;
+        $form['caller_container']['caller']['#default_value'] = $node->caller;
     }
 
     $problem_types = _get_full_problem_type_list();
