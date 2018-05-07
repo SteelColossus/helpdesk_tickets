@@ -161,19 +161,19 @@ function helpdesk_tickets_schema() {
         'description' => 'Stores information about the hardware.',
         'fields' => array(
             'hid' => array(
-                'description' => 'The primary identifier for a caller.',
+                'description' => 'The primary identifier for a piece of hardware.',
                 'type' => 'serial',
                 'unsigned' => TRUE,
                 'not null' => TRUE
             ),
             'name' => array(
-                'description' => 'The full name of a caller.',
+                'description' => 'The name of the hardware.',
                 'type' => 'varchar',
                 'length' => 64,
                 'not null' => TRUE
             ),
             'serial_no' => array(
-                'description' => 'The extension number of a caller.',
+                'description' => 'The serial number of the hardware.',
                 'type' => 'varchar',
                 'length' => 64,
                 'not null' => TRUE
@@ -181,30 +181,98 @@ function helpdesk_tickets_schema() {
         ),
         'primary key' => array('hid')
     );
+
+    $schema['helpdesk_ticket_hardware'] = array(
+        'description' => 'Stores information about the hardware that is associated with each ticket.',
+        'fields' => array(
+            'node' => array(
+                'description' => 'The primary identifier for a helpdesk_ticket node.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'hardware' => array(
+                'description' => 'The primary identifier for a piece of hardware.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            )
+        ),
+        // Used for documentation only.
+        'foreign keys' => array(
+            'fk_node_id' => array(
+                'table' => 'helpdesk_ticket',
+                'columns' => array(
+                    'nid' => 'node'
+                )
+            ),
+            'fk_hardware_id' => array(
+                'table' => 'helpdesk_hardware',
+                'columns' => array(
+                    'hid' => 'hardware'
+                )
+            )
+        ),
+        'primary key' => array('node', 'hardware')
+    );
     
     $schema['helpdesk_software'] = array(
         'description' => 'Stores information about the hardware.',
         'fields' => array(
             'sid' => array(
-                'description' => 'The primary identifier for a caller.',
+                'description' => 'The primary identifier for a piece of software.',
                 'type' => 'serial',
                 'unsigned' => TRUE,
                 'not null' => TRUE
             ),
             'name' => array(
-                'description' => 'The full name of a caller.',
+                'description' => 'The name of the software.',
                 'type' => 'varchar',
                 'length' => 64,
                 'not null' => TRUE
             ),
             'serial_no' => array(
-                'description' => 'The extension number of a caller.',
+                'description' => 'The serial number of the software.',
                 'type' => 'varchar',
                 'length' => 64,
                 'not null' => TRUE
             ),
         ),
         'primary key' => array('sid')
+    );
+
+    $schema['helpdesk_ticket_software'] = array(
+        'description' => 'Stores information about the software that is associated with each ticket.',
+        'fields' => array(
+            'node' => array(
+                'description' => 'The primary identifier for a helpdesk_ticket node.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'software' => array(
+                'description' => 'The primary identifier for a piece of software.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            )
+        ),
+        // Used for documentation only.
+        'foreign keys' => array(
+            'fk_node_id' => array(
+                'table' => 'helpdesk_ticket',
+                'columns' => array(
+                    'nid' => 'node'
+                )
+            ),
+            'fk_software_id' => array(
+                'table' => 'helpdesk_software',
+                'columns' => array(
+                    'sid' => 'software'
+                )
+            )
+        ),
+        'primary key' => array('node', 'software')
     );
 
     $schema['helpdesk_expertises'] = array(
