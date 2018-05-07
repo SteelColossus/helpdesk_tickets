@@ -78,9 +78,13 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#default_value' => isset($node->state) ? $node->state : 1
     );
 
+    $form['caller_container'] = array(
+        '#type' => 'container'
+    );
+
     $callers = _get_full_caller_list();
 
-    $form['caller'] = array(
+    $form['caller_container']['caller'] = array(
         '#type' => 'select',
         '#title' => t('Caller'),
         '#options' => $callers,
@@ -88,7 +92,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#required' => TRUE
     );
 
-    $form['new_caller_link'] = array(
+    $form['caller_container']['new_caller_link'] = array(
         '#type' => 'markup',
         '#markup' => l(t('Add caller'), 'admin/helpdesk_tickets/client/add')
     );
@@ -165,7 +169,7 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#title' => t('State'),
         '#markup' => $state_text
     );
-    
+
     $caller_text = t(_get_caller_name($node->caller));
 
     $node->content['caller'] = array(
