@@ -758,6 +758,16 @@ function helpdesk_specialist_form($form, &$form_state) {
 }
 
 function helpdesk_specialist_form_validate($form, &$form_state) {
+    $result = db_select('helpdesk_expertises', 'e')
+        ->fields('e')
+        ->condition('specialist', $form_state['values']['helpdesk_tickets_specialist_name'], '=')
+        ->condition('problem', $form_state['values']['helpdesk_tickets_specialist_expertise'], '=')
+        ->execute();
+    
+    if ($result->rowCount() > 0) {
+        form_set_error('helpdesk_tickets_specialist_expertise', 'The specialist already has that expertise.');
+    }
+
     return TRUE;
 }
 
