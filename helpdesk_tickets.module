@@ -426,7 +426,24 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_problem_type_submissions',
             'access arguments' => array('administer helpdesk_tickets'),
         ),
-        
+        'admin/helpdesk_tickets/specialist' => array(
+            'title' => 'Specialist',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/specialist/add' => array(
+            'title' => 'Add Expertise',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_specialist_form'),
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
+        'admin/helpdesk_tickets/specialist/view' => array(
+            'title' => 'Specialist List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_specialist_submissions',
+            'access arguments' => array('administer helpdesk_tickets'),
+        ),
     );
     return $items;
 }
@@ -713,6 +730,60 @@ function helpdesk_problem_type_submissions(){
     return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
+function helpdesk_specialist_form($form, &$form_state) {
+    $specialists = _get_full_specialists_list();
+
+    $form['helpdesk_tickets_specialist_name'] = array(
+        '#type' => 'select',
+        '#title' => t('Specialist'),
+        '#options' => $specialists,
+        '#required' => TRUE
+    );
+    
+    $problem_types = _get_full_problem_type_list();
+
+    $form['helpdesk_tickets_specialist_expertise'] = array(
+        '#type' => 'select',
+        '#title' => t('Expertise'),
+        '#options' => $problem_types,
+        '#required' => TRUE
+    );
+
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Add Expertise')
+    );
+
+    return $form;
+}
+
+function helpdesk_specialist_form_validate($form, &$form_state) {
+    return TRUE;
+}
+
+function helpdesk_specialist_form_submit($form, &$form_state) {
+    db_insert('helpdesk_expertises')
+        ->fields(array(
+            'specialist' => $form_state['values']['helpdesk_tickets_specialist_name'],
+            'problem' => $form_state['values']['helpdesk_tickets_specialist_expertise']
+        ))
+        ->execute();
+
+    drupal_set_message(t('Your form entry has been added.'));
+}
+
+function helpdesk_specialist_submissions() {
+    $specialists = _get_full_specialists_list();
+    
+    $header = array(t('Specialist'));
+    $rows = array();
+    
+    foreach ($specialists AS $result) {
+        $rows[] = array($result->name);
+    }
+    
+    return theme('table', array('header' => $header, 'rows' => $rows));
+}
 
 /**
  * Defines how the ticket list page will look like.
