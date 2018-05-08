@@ -128,7 +128,16 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#markup' => l(t('Add a new problem type'), 'admin/helpdesk_tickets/problem_type/add')
     );
 
-    $specialists = _get_full_specialists_list();
+    $specialists = array();
+
+    if (isset($form_state['values']['problem']))
+    {
+        $specialists = _get_full_specialists_list_ordered_by_expertise($form_state['values']['problem']);
+    }
+    else
+    {
+        $specialists = _get_full_specialists_list();
+    }
 
     $form['specialist'] = array(
         '#type' => 'select',
@@ -136,13 +145,20 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#options' => $specialists,
         '#description' => t('Select a specialist to be assigned to this issue.'),
         '#required' => FALSE,
-        '#empty_option' => t('Unassigned')
+        '#empty_option' => t('Unassigned'),
+        '#prefix' => '<div id="specialist-wrapper">',
+        '#suffix' => '</div>'
     );
 
     if (isset($node->specialist))
     {
         $form['specialist']['#default_value'] = $node->specialist;
     }
+
+    $form['problem_container']['problem']['#ajax'] = array(
+        'callback' => 'change_specialist_text',
+        'wrapper' => 'specialist-wrapper'
+    );
 
     $form['hardware'] = array(
         '#type' => 'fieldset',
@@ -203,6 +219,10 @@ function helpdesk_ticket_form($node, &$form_state) {
     }
 
     return $form;
+}
+
+function change_specialist_text($form, &$form_state) {
+    return $form['specialist'];
 }
 
 /**
@@ -788,13 +808,15 @@ function helpdesk_specialist_submissions() {
     $query = db_select('users', 'u');
 
     $query->join('users_roles', 'ur', 'u.uid = ur.uid');
-    $query->rightJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
-    $query->join('helpdesk_problem_type', 'p', 'e.problem = p.pid');
+    $query->leftJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
+    $query->leftJoin('helpdesk_problem_type', 'p', 'e.problem = p.pid');
 
     $query->addField('u', 'name', 'specialist');
-    $query->addExpression('GROUP_CONCAT(p.problem SEPARATOR \', \')', 'problem');
+    $query->addExpression('GROUP_CONCAT(IFNULL(p.problem, \'None\') SEPARATOR \', \')', 'expertises');
 
     $query->condition('ur.rid', $role->rid, '=');
+    $query->groupBy('specialist');
+    $query->orderBy('expertises', 'ASC');
 
     $specialists = $query->execute();
     
@@ -802,7 +824,7 @@ function helpdesk_specialist_submissions() {
     $rows = array();
     
     foreach ($specialists AS $result) {
-        $rows[] = array($result->specialist, $result->problem);
+        $rows[] = array($result->specialist, $result->expertises);
     }
     
     return theme('table', array('header' => $header, 'rows' => $rows));
@@ -998,6 +1020,34 @@ function _get_full_specialists_list() {
     $result = $query->fields('u', array('uid', 'name'))
         ->condition('ur.rid', $role->rid, '=')
         ->execute();
+
+    foreach ($result as $specialist) {
+        $specialists[$specialist->uid] = $specialist->name;
+    }
+
+    return $specialists;
+}
+
+/**
+ * Helper function to get the list of all specialists mapped with unique id and user name.
+ */
+function _get_full_specialists_list_ordered_by_expertise($problem_type_id) {
+    $specialists = array();
+    $role = user_role_load_by_name('specialist');
+
+    $query = db_select('users', 'u');
+
+    $query->join('users_roles', 'ur', 'u.uid = ur.uid');
+    $query->leftJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
+
+    $query->fields('u', array('uid', 'name'));
+    $query->fields('e', array('problem'));
+    $query->addExpression('CASE WHEN problem=' . $problem_type_id . ' THEN 0 ELSE 1 END', 'order_col');
+
+    $query->condition('ur.rid', $role->rid, '=');
+    $query->orderBy('order_col', 'ASC');
+
+    $result = $query->execute();
 
     foreach ($result as $specialist) {
         $specialists[$specialist->uid] = $specialist->name;
