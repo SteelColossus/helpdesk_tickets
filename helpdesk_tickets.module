@@ -500,10 +500,12 @@ function helpdesk_client_submissions(){
     $rows = array();
     
     foreach($results AS $result){
+        $ticket_no = db_query("SELECT COUNT(b.nid) AS ticket FROM {helpdesk_caller} AS a LEFT OUTER JOIN {helpdesk_ticket} AS b ON a.cid = b.cid WHERE a.cid = {$result->cid} AND b.state = 1");
         $rows[] = array(
             $result->name,
             $result->ext_no,
             $result->dept,
+            $ticket_no->fetchField(),
         );
     }
     
