@@ -165,22 +165,25 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#title' => t('Hardware'),
         '#collapsible' => TRUE
     );
+
+    $hardware = _get_full_hardware_list();
     
-    $form['hardware']['hardware_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Name'),
-        '#size' => 32
-    );
+    if (count($hardware) > 0) {
+        $form['hardware']['hardware_name'] = array(
+            '#type' => 'select',
+            '#title' => t('Name'),
+            '#options' => $hardware
+        );
 
-    $form['hardware']['hardware_serial_no'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Serial number'),
-        '#size' => 64
-    );
+        $form['hardware']['add_hardware_button'] = array(
+            '#type' => 'button',
+            '#value' => t('Add hardware')
+        );
+    }
 
-    $form['hardware']['add_hardware_button'] = array(
-        '#type' => 'button',
-        '#value' => t('Add hardware')
+    $form['hardware']['new_hardware_link'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Add a new piece of hardware'), 'admin/helpdesk_tickets/hardware/add')
     );
 
     $form['software'] = array(
@@ -188,22 +191,25 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#title' => t('Software'),
         '#collapsible' => TRUE
     );
+
+    $software = _get_full_software_list();
     
-    $form['software']['software_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Name'),
-        '#size' => 32
-    );
+    if (count($software) > 0) {
+        $form['software']['software_name'] = array(
+            '#type' => 'select',
+            '#title' => t('Name'),
+            '#options' => $software
+        );
 
-    $form['software']['software_serial_no'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Serial number'),
-        '#size' => 64
-    );
+        $form['software']['add_software_button'] = array(
+            '#type' => 'button',
+            '#value' => t('Add software')
+        );
+    }
 
-    $form['software']['add_software_button'] = array(
-        '#type' => 'button',
-        '#value' => t('Add software')
+    $form['software']['new_software_link'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('Add a new piece of software'), 'admin/helpdesk_tickets/software/add')
     );
 
     $form['notes'] = array(
@@ -1029,7 +1035,7 @@ function _get_full_specialists_list() {
 }
 
 /**
- * Helper function to get the list of all specialists mapped with unique id and user name.
+ * Helper function to get the list of all specialists mapped with unique id and user name, ordered by a given problem type.
  */
 function _get_full_specialists_list_ordered_by_expertise($problem_type_id) {
     $specialists = array();
@@ -1054,4 +1060,38 @@ function _get_full_specialists_list_ordered_by_expertise($problem_type_id) {
     }
 
     return $specialists;
+}
+
+/**
+ * Helper function to get the list of all hardware mapped with unique id and name.
+ */
+function _get_full_hardware_list() {
+    $hardware_list = array();
+
+    $result = db_select('helpdesk_hardware', 'h')
+        ->fields('h', array('hid', 'name'))
+        ->execute();
+
+    foreach ($result as $hardware) {
+        $hardware_list[$hardware->hid] = $hardware->name;
+    }
+
+    return $hardware_list;
+}
+
+/**
+ * Helper function to get the list of all software mapped with unique id and name.
+ */
+function _get_full_software_list() {
+    $software_list = array();
+
+    $result = db_select('helpdesk_software', 's')
+        ->fields('s', array('sid', 'name'))
+        ->execute();
+
+    foreach ($result as $software) {
+        $software_list[$software->sid] = $software->name;
+    }
+
+    return $software_list;
 }
