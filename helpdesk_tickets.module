@@ -496,7 +496,7 @@ function helpdesk_client_form_submit($form, &$form_state){
 function helpdesk_client_submissions(){
     $results = db_query("SELECT * FROM {helpdesk_caller}");
     
-    $header = array(t('Name'), t('Extension No'), t('Department'));
+    $header = array(t('Name'), t('Extension No'), t('Department'), t('Open Tickets'));
     $rows = array();
     
     foreach($results AS $result){
