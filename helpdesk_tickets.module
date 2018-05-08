@@ -773,13 +773,26 @@ function helpdesk_specialist_form_submit($form, &$form_state) {
 }
 
 function helpdesk_specialist_submissions() {
-    $specialists = _get_full_specialists_list();
+    $role = user_role_load_by_name('specialist');
+
+    $query = db_select('users', 'u');
+
+    $query->join('users_roles', 'ur', 'u.uid = ur.uid');
+    $query->rightJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
+    $query->join('helpdesk_problem_type', 'p', 'e.problem = p.pid');
+
+    $query->addField('u', 'name', 'specialist');
+    $query->addField('p', 'problem', 'problem');
+
+    $query->condition('ur.rid', $role->rid, '=');
+
+    $specialists = $query->execute();
     
-    $header = array(t('Specialist'));
+    $header = array(t('Specialist'), t('Expertises'));
     $rows = array();
     
     foreach ($specialists AS $result) {
-        $rows[] = array($result->name);
+        $rows[] = array($result->specialist, $result->problem);
     }
     
     return theme('table', array('header' => $header, 'rows' => $rows));
