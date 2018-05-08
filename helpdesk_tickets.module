@@ -782,7 +782,7 @@ function helpdesk_specialist_submissions() {
     $query->join('helpdesk_problem_type', 'p', 'e.problem = p.pid');
 
     $query->addField('u', 'name', 'specialist');
-    $query->addField('p', 'problem', 'problem');
+    $query->addExpression('GROUP_CONCAT(p.problem SEPARATOR \', \')', 'problem');
 
     $query->condition('ur.rid', $role->rid, '=');
 
