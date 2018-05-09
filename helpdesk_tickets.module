@@ -862,6 +862,7 @@ function helpdesk_tickets_list_page() {
     $query->join('helpdesk_caller', 'c', 't.cid = c.cid');
     $query->join('helpdesk_problem_type', 'pt', 't.problem = pt.pid');
 
+    $query->addField('n', 'nid', 'id');
     $query->addField('n', 'title', 'title');
     $query->addField('n', 'created', 'date');
     $query->addField('u', 'name', 'creator');
@@ -877,7 +878,10 @@ function helpdesk_tickets_list_page() {
     $rows = array();
 
     foreach ($result as $record) {
-        $rows[] = array($record->title, $record->caller, $record->problem, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator);
+        $rows[] = array(
+            'data' => array($record->title, $record->caller, $record->problem, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator),
+            'onclick' => 'window.location=\'/ticket/' . $record->id . '\''
+        );
     }
 
     $output = 'No tickets have been added yet.';
