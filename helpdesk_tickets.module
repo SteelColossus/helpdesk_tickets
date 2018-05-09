@@ -744,12 +744,14 @@ function helpdesk_problem_type_form_submit($form, &$form_state){
 function helpdesk_problem_type_submissions(){
     $results = db_query("SELECT * FROM {helpdesk_problem_type}");
     
-    $header = array(t('Problem Type'));
+    $header = array(t('Problem Type'), t('Open Tickets'));
     $rows = array();
     
     foreach($results AS $result){
+        $ticket_no = db_query("SELECT COUNT(b.nid) AS ticket FROM {helpdesk_problem_type} AS a LEFT OUTER JOIN {helpdesk_ticket} AS b ON a.pid = b.problem WHERE a.problem = '{$result->problem}' AND b.state = 1");
         $rows[] = array(
             $result->problem,
+            $ticket_no->fetchField(),
         );
     }
     
