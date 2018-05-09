@@ -19,6 +19,17 @@ function helpdesk_tickets_node_info() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function helpdesk_tickets_theme() {
+    return array(
+        'hardware_table' => array(
+            'render element' => 'form'
+        )
+    );
+}
+
+/**
  * Implementation of hook_load().
  * Act on nodes being loaded from the database.
  * Node-type specific.
@@ -37,6 +48,22 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->problem = $record->problem;
         $nodes[$record->nid]->specialist = $record->specialist;
         $nodes[$record->nid]->notes = $record->notes;
+        $nodes[$record->nid]->hardware_list = array();
+
+        $hardware_query = db_select('helpdesk_ticket_hardware', 'th');
+
+        $hardware_query->join('helpdesk_hardware', 'h', 'th.hardware = h.hid');
+        $hardware_query->fields('h', array('name', 'serial_no'));
+        $hardware_query->condition('node', $record->nid, '=');
+
+        $hardware_result = $hardware_query->execute();
+
+        foreach ($hardware_result as $hardware_record) {
+            $nodes[$record->nid]->hardware_list[] = array(
+                'name' => $hardware_record->name,
+                'serial_no' => $hardware_record->serial_no
+            );
+        }
     }
 }
 
@@ -169,6 +196,23 @@ function helpdesk_ticket_form($node, &$form_state) {
     $hardware = _get_full_hardware_list();
     
     if (count($hardware) > 0) {
+        $form['hardware']['hardware_list'] = array(
+            '#prefix' => '<div id="hardware-list">',
+            '#suffix' => '</div>',
+            '#theme' => 'hardware_table'
+        );
+
+        $key = 0;
+
+        if (isset($node->hardware_list)) {
+            foreach ($node->hardware_list as $hardware) {
+                $form['hardware']['hardware_list'][$key] = array(
+                    '#type' => 'value',
+                    '#value' => $hardware['serial_no']
+                );
+            }
+        }
+
         $form['hardware']['hardware_name'] = array(
             '#type' => 'select',
             '#title' => t('Name'),
@@ -177,7 +221,16 @@ function helpdesk_ticket_form($node, &$form_state) {
 
         $form['hardware']['add_hardware_button'] = array(
             '#type' => 'button',
-            '#value' => t('Add hardware')
+            '#value' => t('Add hardware'),
+            '#limit_validation_errors' => array(),
+            '#submit' => array(
+                'add_hardware_submit'
+            ),
+            '#ajax' => array(
+                'callback' => 'add_hardware_js',
+                'wrapper' => 'hardware-list',
+                'effect' => 'fade'
+            )
         );
     }
 
@@ -229,6 +282,30 @@ function helpdesk_ticket_form($node, &$form_state) {
 
 function change_specialist_text($form, &$form_state) {
     return $form['specialist'];
+}
+
+function add_hardware_js($form, &$form_state) {
+    return $form['hardware']['hardware_list'];
+}
+
+function add_hardware_submit($form, &$form_state) {
+    $form_state['node']->choice = array_values($form_state['values']['choice']);
+    $form_state['rebuild'] = TRUE;
+}
+
+function theme_hardware_table($variables) {
+    $form = $variables['form'];
+
+    $headers = array('Serial Number');
+    $rows = array();
+
+    foreach (element_children($form) as $key) {
+        $rows[] = array(
+            $form[$key]['#value']
+        );
+    }
+
+    return theme('table', array('header' => $headers, 'rows' => $rows));
 }
 
 /**
