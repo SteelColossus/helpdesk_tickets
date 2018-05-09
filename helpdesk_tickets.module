@@ -818,6 +818,7 @@ function helpdesk_specialist_submissions() {
     $query->leftJoin('helpdesk_problem_type', 'p', 'e.problem = p.pid');
 
     $query->addField('u', 'name', 'specialist');
+    $query->addField('u', 'uid', 'specid');
     $query->addExpression('GROUP_CONCAT(IFNULL(p.problem, \'None\') SEPARATOR \', \')', 'expertises');
 
     $query->condition('ur.rid', $role->rid, '=');
@@ -826,11 +827,12 @@ function helpdesk_specialist_submissions() {
 
     $specialists = $query->execute();
     
-    $header = array(t('Specialist'), t('Expertises'));
+    $header = array(t('Specialist'), t('Expertises'), t('Open Tickets'));
     $rows = array();
     
     foreach ($specialists AS $result) {
-        $rows[] = array($result->specialist, $result->expertises);
+        $ticket_no = db_query("SELECT COUNT(a.nid) AS ticket FROM {helpdesk_ticket} AS a RIGHT OUTER JOIN {users} AS b ON a.specialist = b.uid WHERE a.specialist = {$result->specid} AND a.state = 1");
+        $rows[] = array($result->specialist, $result->expertises, $ticket_no->fetchField());
     }
     
     return theme('table', array('header' => $header, 'rows' => $rows));
