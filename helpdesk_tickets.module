@@ -662,6 +662,32 @@ function helpdesk_tickets_permission() {
     return array(
         'administer helpdesk_tickets' => array(
             'title' => t('Administer Helpdesk Tickets'),
+            'restrict access' => TRUE,
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //add hardware, software, problem type, expertises
+        'can view information' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view hardware, software, problem type, expertises
+        'can view information' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //add and view caller
+        'can add and view caller' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view tickets and overview
+        'can view tickets' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view analytics
+        'can view analytics' => array(
+            'title' => t('Administer Helpdesk Tickets'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
     );
