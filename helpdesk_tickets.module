@@ -20,12 +20,52 @@ function helpdesk_tickets_node_info() {
 
 /**
  * Implementation of hook_theme().
+ * Register a module (or theme's) theme implementations.
  */
 function helpdesk_tickets_theme() {
     return array(
-        'hardware_table' => array(
+        'hardware_wrapper' => array(
             'render element' => 'form'
         )
+    );
+}
+
+/**
+ * Implementation of hook_permission().
+ * Define user permissions.
+ */
+function helpdesk_tickets_permission() {
+    return array(
+        'administer helpdesk_tickets' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'restrict access' => TRUE,
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //add hardware, software, problem type, expertises
+        'can view information' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view hardware, software, problem type, expertises
+        'can view information' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //add and view caller
+        'can add and view caller' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view tickets and overview
+        'can view tickets' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
+        //view analytics
+        'can view analytics' => array(
+            'title' => t('Administer Helpdesk Tickets'),
+            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
+        ),
     );
 }
 
@@ -143,8 +183,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#markup' => l(t('Add a new caller'), 'admin/helpdesk_tickets/client/add')
     );
 
-    if (isset($node->caller))
-    {
+    if (isset($node->caller)) {
         $form['caller_container']['caller']['#default_value'] = $node->caller;
     }
 
@@ -162,8 +201,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#required' => TRUE
     );
 
-    if (isset($node->problem))
-    {
+    if (isset($node->problem)) {
         $form['problem_container']['problem']['#default_value'] = $node->problem;
     }
 
@@ -174,8 +212,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $specialists = array();
 
-    if (isset($form_state['values']['problem']))
-    {
+    if (isset($form_state['values']['problem'])) {
         $specialists = _get_full_specialists_list_ordered_by_expertise($form_state['values']['problem']);
     }
     else
@@ -194,13 +231,12 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#suffix' => '</div>'
     );
 
-    if (isset($node->specialist))
-    {
+    if (isset($node->specialist)) {
         $form['specialist']['#default_value'] = $node->specialist;
     }
 
     $form['problem_container']['problem']['#ajax'] = array(
-        'callback' => 'change_specialist_text',
+        'callback' => 'change_specialist_ajax_callback',
         'wrapper' => 'specialist-wrapper',
         'effect' => 'fade'
     );
@@ -217,7 +253,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['hardware']['hardware_section'] = array(
             '#prefix' => '<div id="hardware-wrapper">',
             '#suffix' => '</div>',
-            '#theme' => 'hardware_table'
+            '#theme' => 'hardware_wrapper'
         );
 
         if (isset($node->hardware_list)) {
@@ -262,7 +298,7 @@ function helpdesk_ticket_form($node, &$form_state) {
                     'add_hardware_submit'
                 ),
                 '#ajax' => array(
-                    'callback' => 'add_hardware_js',
+                    'callback' => 'add_hardware_ajax_callback',
                     'wrapper' => 'hardware-wrapper',
                     'effect' => 'fade'
                 )
@@ -293,7 +329,7 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['software']['software_section'] = array(
             '#prefix' => '<div id="software-wrapper">',
             '#suffix' => '</div>',
-            '#theme' => 'hardware_table'
+            '#theme' => 'hardware_wrapper'
         );
 
         if (isset($node->software_list)) {
@@ -338,7 +374,7 @@ function helpdesk_ticket_form($node, &$form_state) {
                     'add_software_submit'
                 ),
                 '#ajax' => array(
-                    'callback' => 'add_software_js',
+                    'callback' => 'add_software_ajax_callback',
                     'wrapper' => 'software-wrapper',
                     'effect' => 'fade'
                 )
@@ -364,26 +400,37 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#required' => FALSE
     );
 
-    if (isset($node->notes))
-    {
+    if (isset($node->notes)) {
         $form['notes']['#default_value'] = $node->notes;
     }
 
     return $form;
 }
 
-function change_specialist_text($form, &$form_state) {
+/**
+ * Ajax callback for the specialist wrapper.
+ */
+function change_specialist_ajax_callback($form, &$form_state) {
     return $form['specialist'];
 }
 
-function add_hardware_js($form, &$form_state) {
+/**
+ * Ajax callback for the hardware wrapper.
+ */
+function add_hardware_ajax_callback($form, &$form_state) {
     return $form['hardware']['hardware_section'];
 }
 
-function add_software_js($form, &$form_state) {
+/**
+ * Ajax callback for the software wrapper.
+ */
+function add_software_ajax_callback($form, &$form_state) {
     return $form['software']['software_section'];
 }
 
+/**
+ * Submit function for adding a new piece of hardware.
+ */
 function add_hardware_submit($form, &$form_state) {
     $hid = $form_state['values']['hardware_name'];
 
@@ -403,6 +450,9 @@ function add_hardware_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * Submit function for adding a new piece of software.
+ */
 function add_software_submit($form, &$form_state) {
     $sid = $form_state['values']['software_name'];
 
@@ -422,15 +472,17 @@ function add_software_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
 }
 
-function theme_hardware_table($variables) {
+/**
+ * The theme function for the hardware (and currently software) wrapper.
+ */
+function theme_hardware_wrapper($variables) {
     $form = $variables['form'];
 
     $headers = array('Name', 'Serial Number');
     $rows = array();
 
     foreach (element_children($form) as $key) {
-        if (isset($form[$key]['name']) && isset($form[$key]['serial_no']))
-        {
+        if (isset($form[$key]['name']) && isset($form[$key]['serial_no'])) {
             $rows[] = array(
                 $form[$key]['name']['#value'],
                 $form[$key]['serial_no']['#value']
@@ -484,8 +536,7 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
 
     $specialist_text = t('None');
 
-    if ($node->specialist !== NULL)
-    {
+    if ($node->specialist !== NULL) {
         $specialist_text = t(_get_user_name($node->specialist));
     }
 
@@ -495,8 +546,7 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $specialist_text
     );
 
-    if ($node->notes !== '')
-    {
+    if ($node->notes !== '') {
         $node->content['notes'] = array(
             '#type' => 'item',
             '#title' => t('Notes'),
@@ -713,21 +763,25 @@ function helpdesk_tickets_menu() {
             'access arguments' => array('administer helpdesk_tickets'),
         ),
     );
+
     return $items;
 }
 
 /**
-*  Administration form for Helpdesk Clients
-*/
+ * Administration form function for the add helpdesk clients form.
+ */
 function helpdesk_client_form($form, &$form_state){
-    /**$form['helpdesk_tickets_client_id'] = array(
+    /*
+    $form['helpdesk_tickets_client_id'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client ID'), 
         '#default_value' => variable_get('client_id', ''), 
         '#size' => 60, 
         '#maxlength' => 128, 
         '#required' => TRUE,
-    );*/
+    );
+    */
+
     $form['helpdesk_tickets_client_name'] = array(
         '#type' => 'textfield', 
         '#title' => t('Client Name'), 
@@ -759,14 +813,21 @@ function helpdesk_client_form($form, &$form_state){
         '#type' => 'submit',
         '#value' => t('Add Client'),
     );
+
     return $form;
 }
 
+/**
+ * Validation function for the add helpdesk clients form.
+ */
 function helpdesk_client_form_validate($form, &$form_state) {
     return TRUE;
 }
 
-function helpdesk_client_form_submit($form, &$form_state){
+/**
+ * Submit function for the add helpdesk clients form.
+ */
+function helpdesk_client_form_submit($form, &$form_state) {
     $cid = db_insert('helpdesk_caller')
         ->fields(array(
             'name' => $form_state['values']['helpdesk_tickets_client_name'],
@@ -778,13 +839,16 @@ function helpdesk_client_form_submit($form, &$form_state){
     drupal_set_message(t('Your form entry has been added.'));
 }
 
-function helpdesk_client_submissions(){
+/**
+ * Administration form function for the view helpdesk clients form.
+ */
+function helpdesk_client_submissions() {
     $results = db_query("SELECT * FROM {helpdesk_caller}");
     
     $header = array(t('Name'), t('Extension No'), t('Department'), t('Open Tickets'));
     $rows = array();
     
-    foreach($results AS $result){
+    foreach ($results AS $result) {
         $ticket_no = db_query("SELECT COUNT(b.nid) AS ticket FROM {helpdesk_caller} AS a LEFT OUTER JOIN {helpdesk_ticket} AS b ON a.cid = b.cid WHERE a.cid = {$result->cid} AND b.state = 1");
         $rows[] = array(
             $result->name,
@@ -798,56 +862,9 @@ function helpdesk_client_submissions(){
 }
 
 /**
- * Implementation of hook_permission().
- * Define user permissions.
-*/
-function helpdesk_tickets_permission() {
-    return array(
-        'administer helpdesk_tickets' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'restrict access' => TRUE,
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-        //add hardware, software, problem type, expertises
-        'can view information' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-        //view hardware, software, problem type, expertises
-        'can view information' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-        //add and view caller
-        'can add and view caller' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-        //view tickets and overview
-        'can view tickets' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-        //view analytics
-        'can view analytics' => array(
-            'title' => t('Administer Helpdesk Tickets'),
-            'description' => t('Perform administration tasks for Helpdesk Tickets.'),
-        ),
-    );
-}
-
-/**
-*  Administration form for Helpdesk Hardware
-*/
-function helpdesk_hardware_form($form, &$form_state){
-    /**$form['helpdesk_tickets_client_id'] = array(
-        '#type' => 'textfield', 
-        '#title' => t('Client ID'), 
-        '#default_value' => variable_get('client_id', ''), 
-        '#size' => 60, 
-        '#maxlength' => 128, 
-        '#required' => TRUE,
-    );*/
+ * Administration form function for the add hardware form.
+ */
+function helpdesk_hardware_form($form, &$form_state) {
     $form['helpdesk_tickets_hardware_name'] = array(
         '#type' => 'textfield', 
         '#title' => t('Hardware Name'), 
@@ -856,6 +873,7 @@ function helpdesk_hardware_form($form, &$form_state){
         '#maxlength' => 128,  
         '#required' => TRUE,
     );
+
     $form['helpdesk_tickets_hardware_serial_no'] = array(
         '#type' => 'textfield', 
         '#title' => t("Hardware's Serial Number"), 
@@ -869,14 +887,21 @@ function helpdesk_hardware_form($form, &$form_state){
         '#type' => 'submit',
         '#value' => t('Add Hardware'),
     );
+
     return $form;
 }
 
+/**
+ * Validation function for the add hardware form.
+ */
 function helpdesk_hardware_form_validate($form, &$form_state) {
     return TRUE;
 }
 
-function helpdesk_hardware_form_submit($form, &$form_state){
+/**
+ * Submit function for the add hardware form.
+ */
+function helpdesk_hardware_form_submit($form, &$form_state) {
     $cid = db_insert('helpdesk_hardware')
         ->fields(array(
             'name' => $form_state['values']['helpdesk_tickets_hardware_name'],
@@ -887,13 +912,16 @@ function helpdesk_hardware_form_submit($form, &$form_state){
     drupal_set_message(t('Your form entry has been added.'));
 }
 
-function helpdesk_hardware_submissions(){
+/**
+ * Administration form function for the view hardware form.
+ */
+function helpdesk_hardware_submissions() {
     $results = db_query("SELECT * FROM {helpdesk_hardware}");
     
     $header = array(t('Name'), t('Serial No'));
     $rows = array();
     
-    foreach($results AS $result){
+    foreach ($results AS $result) {
         $rows[] = array(
             $result->name,
             $result->serial_no,
@@ -904,17 +932,9 @@ function helpdesk_hardware_submissions(){
 }
 
 /**
-*  Administration form for Helpdesk Clients
-*/
-function helpdesk_software_form($form, &$form_state){
-    /**$form['helpdesk_tickets_client_id'] = array(
-        '#type' => 'textfield', 
-        '#title' => t('Client ID'), 
-        '#default_value' => variable_get('client_id', ''), 
-        '#size' => 60, 
-        '#maxlength' => 128, 
-        '#required' => TRUE,
-    );*/
+ * Administration form function for the add software form.
+ */
+function helpdesk_software_form($form, &$form_state) {
     $form['helpdesk_tickets_software_name'] = array(
         '#type' => 'textfield', 
         '#title' => t('Software Name'), 
@@ -923,6 +943,7 @@ function helpdesk_software_form($form, &$form_state){
         '#maxlength' => 128,  
         '#required' => TRUE,
     );
+
     $form['helpdesk_tickets_software_serial_no'] = array(
         '#type' => 'textfield', 
         '#title' => t("Software's Serial Number"), 
@@ -936,14 +957,21 @@ function helpdesk_software_form($form, &$form_state){
         '#type' => 'submit',
         '#value' => t('Add Software'),
     );
+
     return $form;
 }
 
+/**
+ * Validation function for the add software form.
+ */
 function helpdesk_software_form_validate($form, &$form_state) {
     return TRUE;
 }
 
-function helpdesk_software_form_submit($form, &$form_state){
+/**
+ * Submit function for the add software form.
+ */
+function helpdesk_software_form_submit($form, &$form_state) {
     $cid = db_insert('helpdesk_software')
         ->fields(array(
             'name' => $form_state['values']['helpdesk_tickets_software_name'],
@@ -954,13 +982,16 @@ function helpdesk_software_form_submit($form, &$form_state){
     drupal_set_message(t('Your form entry has been added.'));
 }
 
-function helpdesk_software_submissions(){
+/**
+ * Administration form function for the view software form.
+ */
+function helpdesk_software_submissions() {
     $results = db_query("SELECT * FROM {helpdesk_software}");
     
     $header = array(t('Name'), t('Serial No'));
     $rows = array();
     
-    foreach($results AS $result){
+    foreach ($results AS $result) {
         $rows[] = array(
             $result->name,
             $result->serial_no,
@@ -970,15 +1001,10 @@ function helpdesk_software_submissions(){
     return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
-function helpdesk_problem_type_form($form, &$form_state){
-    /**$form['helpdesk_tickets_client_id'] = array(
-        '#type' => 'textfield', 
-        '#title' => t('Client ID'), 
-        '#default_value' => variable_get('client_id', ''), 
-        '#size' => 60, 
-        '#maxlength' => 128, 
-        '#required' => TRUE,
-    );*/
+/**
+ * Administration form function for the add problem types form.
+ */
+function helpdesk_problem_type_form($form, &$form_state) {
     $form['helpdesk_tickets_problem_type_name'] = array(
         '#type' => 'textfield', 
         '#title' => t('Problem Type'), 
@@ -992,14 +1018,21 @@ function helpdesk_problem_type_form($form, &$form_state){
         '#type' => 'submit',
         '#value' => t('Add Problem Type'),
     );
+
     return $form;
 }
 
+/**
+ * Validation function for the add problem types form.
+ */
 function helpdesk_problem_type_form_validate($form, &$form_state) {
     return TRUE;
 }
 
-function helpdesk_problem_type_form_submit($form, &$form_state){
+/**
+ * Submit function for the add problem types form.
+ */
+function helpdesk_problem_type_form_submit($form, &$form_state) {
     $cid = db_insert('helpdesk_problem_type')
         ->fields(array(
             'problem' => $form_state['values']['helpdesk_tickets_problem_type_name'],
@@ -1009,13 +1042,16 @@ function helpdesk_problem_type_form_submit($form, &$form_state){
     drupal_set_message(t('Your form entry has been added.'));
 }
 
-function helpdesk_problem_type_submissions(){
+/**
+ * Administration form function for the view problem types form.
+ */
+function helpdesk_problem_type_submissions() {
     $results = db_query("SELECT * FROM {helpdesk_problem_type}");
     
     $header = array(t('Problem Type'), t('Open Tickets'));
     $rows = array();
     
-    foreach($results AS $result){
+    foreach ($results AS $result) {
         $ticket_no = db_query("SELECT COUNT(b.nid) AS ticket FROM {helpdesk_problem_type} AS a LEFT OUTER JOIN {helpdesk_ticket} AS b ON a.pid = b.problem WHERE a.problem = '{$result->problem}' AND b.state = 1");
         $rows[] = array(
             $result->problem,
@@ -1026,6 +1062,9 @@ function helpdesk_problem_type_submissions(){
     return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
+/**
+ * Administration form function for the add specialists form.
+ */
 function helpdesk_specialist_form($form, &$form_state) {
     $specialists = _get_full_specialists_list();
 
@@ -1053,6 +1092,9 @@ function helpdesk_specialist_form($form, &$form_state) {
     return $form;
 }
 
+/**
+ * Validation function for the add specialists form.
+ */
 function helpdesk_specialist_form_validate($form, &$form_state) {
     $result = db_select('helpdesk_expertises', 'e')
         ->fields('e')
@@ -1067,6 +1109,9 @@ function helpdesk_specialist_form_validate($form, &$form_state) {
     return TRUE;
 }
 
+/**
+ * Administration form function for the view specialists form.
+ */
 function helpdesk_specialist_form_submit($form, &$form_state) {
     db_insert('helpdesk_expertises')
         ->fields(array(
@@ -1078,6 +1123,9 @@ function helpdesk_specialist_form_submit($form, &$form_state) {
     drupal_set_message(t('Your form entry has been added.'));
 }
 
+/**
+ * Administration form function for the view specialists form.
+ */
 function helpdesk_specialist_submissions() {
     $role = user_role_load_by_name('specialist');
 
@@ -1109,7 +1157,7 @@ function helpdesk_specialist_submissions() {
 }
 
 /**
- * Defines how the ticket list page will look like.
+ * Page function for the ticket list page.
  */
 function helpdesk_tickets_list_page() {
     $header = array(
@@ -1158,8 +1206,7 @@ function helpdesk_tickets_list_page() {
 
     $output = 'No tickets have been added yet.';
 
-    if (count($rows) > 0)
-    {
+    if (count($rows) > 0) {
         $output = theme('table', array('header' => $header, 'rows' => $rows));
     }
 
