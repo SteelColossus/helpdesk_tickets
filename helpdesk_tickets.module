@@ -213,10 +213,29 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#markup' => l(t('Add a new problem type'), 'admin/helpdesk_tickets/problem_type/add')
     );
 
+    if (!empty($node->specialist)) {
+        $node->specialist_initial = $node->specialist;
+    }
+
     $specialists = array();
 
     if (isset($form_state['values']['problem'])) {
-        $specialists = _get_full_specialists_list_ordered_by_expertise($form_state['values']['problem']);
+        $specialists_raw = _get_full_specialists_list_ordered_by_expertise($form_state['values']['problem']);
+
+        $i = 0;
+
+        foreach ($specialists_raw as $key => $specialist) {
+            $specialists[$key] = $specialist['name'];
+
+            if ($i === 0 && $specialist['is_expert'] == 1 && !isset($node->specialist_initial)) {
+                $form['specialist_new_value'] = array(
+                    '#type' => 'value',
+                    '#value' => $key
+                );
+            }
+
+            $i++;
+        }
     }
     else
     {
@@ -414,6 +433,10 @@ function helpdesk_ticket_form($node, &$form_state) {
  * Ajax callback for the specialist wrapper.
  */
 function change_specialist_ajax_callback($form, &$form_state) {
+    if (isset($form['specialist_new_value']['#value'])) {
+        $form['specialist']['#value'] = $form['specialist_new_value']['#value'];
+    }
+
     return $form['specialist'];
 }
 
@@ -1388,15 +1411,22 @@ function _get_full_specialists_list_ordered_by_expertise($problem_type_id) {
 
     $query->fields('u', array('uid', 'name'));
     $query->fields('e', array('problem'));
-    $query->addExpression('CASE WHEN problem=' . $problem_type_id . ' THEN 0 ELSE 1 END', 'order_col');
+    $query->addExpression('CASE WHEN problem=' . $problem_type_id . ' THEN 1 ELSE 0 END', 'is_expert');
 
     $query->condition('ur.rid', $role->rid, '=');
-    $query->orderBy('order_col', 'ASC');
+    $query->orderBy('is_expert', 'DESC');
 
     $result = $query->execute();
 
+    $specialists = array();
+
     foreach ($result as $specialist) {
-        $specialists[$specialist->uid] = $specialist->name;
+        if (!isset($specialists[$specialist->uid])) {
+            $specialists[$specialist->uid] = array(
+                'name' => $specialist->name,
+                'is_expert' => $specialist->is_expert
+            );
+        }
     }
 
     return $specialists;
