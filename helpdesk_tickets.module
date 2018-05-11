@@ -198,8 +198,8 @@ function helpdesk_ticket_form($node, &$form_state) {
     $hardware_options = _get_full_hardware_list();
     
     if (count($hardware_options) > 0) {
-        $form['hardware']['hardware_list'] = array(
-            '#prefix' => '<div id="hardware-list">',
+        $form['hardware']['hardware_section'] = array(
+            '#prefix' => '<div id="hardware-wrapper">',
             '#suffix' => '</div>',
             '#theme' => 'hardware_table'
         );
@@ -208,45 +208,56 @@ function helpdesk_ticket_form($node, &$form_state) {
             $key = 0;
 
             foreach ($node->hardware_list as $hardware) {
-                $form['hardware']['hardware_list'][$key] = array('#tree' => TRUE);
+                $form['hardware']['hardware_section'][$key] = array('#tree' => TRUE);
                 
-                $form['hardware']['hardware_list'][$key]['name'] = array(
+                $form['hardware']['hardware_section'][$key]['name'] = array(
                     '#type' => 'value',
                     '#value' => $hardware['name']
                 );
 
-                $form['hardware']['hardware_list'][$key]['serial_no'] = array(
+                $form['hardware']['hardware_section'][$key]['serial_no'] = array(
                     '#type' => 'value',
                     '#value' => $hardware['serial_no']
                 );
+
+                // Remove the hardware from the select as it has already been added
+                unset($hardware_options[$hardware['hid']]);
 
                 $key++;
             }
         }
 
-        $form['hardware']['hardware_name'] = array(
-            '#type' => 'select',
-            '#title' => t('Name'),
-            '#options' => $hardware_options
-        );
+        if (count($hardware_options) > 0) { 
+            $form['hardware']['hardware_section']['hardware_name'] = array(
+                '#type' => 'select',
+                '#title' => t('Name'),
+                '#options' => $hardware_options
+            );
 
-        $form['hardware']['add_hardware_button'] = array(
-            '#type' => 'submit',
-            '#value' => t('Add hardware'),
-            '#limit_validation_errors' => array(
-                array(
-                    'hardware_name'
+            $form['hardware']['hardware_section']['add_hardware_button'] = array(
+                '#type' => 'submit',
+                '#value' => t('Add hardware'),
+                '#limit_validation_errors' => array(
+                    array(
+                        'hardware_name'
+                    )
+                ),
+                '#submit' => array(
+                    'add_hardware_submit'
+                ),
+                '#ajax' => array(
+                    'callback' => 'add_hardware_js',
+                    'wrapper' => 'hardware-wrapper',
+                    'effect' => 'fade'
                 )
-            ),
-            '#submit' => array(
-                'add_hardware_submit'
-            ),
-            '#ajax' => array(
-                'callback' => 'add_hardware_js',
-                'wrapper' => 'hardware-list',
-                'effect' => 'fade'
-            )
-        );
+            );
+        }
+        else {
+            $form['hardware']['hardware_section']['all_hardware_message'] = array(
+                '#type' => 'markup',
+                '#markup' => 'You have added all available hardware to this issue.<br>'
+            );
+        }
     }
 
     $form['hardware']['new_hardware_link'] = array(
@@ -300,7 +311,7 @@ function change_specialist_text($form, &$form_state) {
 }
 
 function add_hardware_js($form, &$form_state) {
-    return $form['hardware']['hardware_list'];
+    return $form['hardware']['hardware_section'];
 }
 
 function add_hardware_submit($form, &$form_state) {
@@ -329,13 +340,19 @@ function theme_hardware_table($variables) {
     $rows = array();
 
     foreach (element_children($form) as $key) {
-        $rows[] = array(
-            $form[$key]['name']['#value'],
-            $form[$key]['serial_no']['#value']
-        );
+        if (isset($form[$key]['name']) && isset($form[$key]['serial_no']))
+        {
+            $rows[] = array(
+                $form[$key]['name']['#value'],
+                $form[$key]['serial_no']['#value']
+            );
+        }
     }
 
-    return theme('table', array('header' => $headers, 'rows' => $rows));
+    $output = theme('table', array('header' => $headers, 'rows' => $rows));
+    $output .= drupal_render_children($form);
+
+    return $output;
 }
 
 /**
