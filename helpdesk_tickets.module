@@ -65,6 +65,22 @@ function helpdesk_ticket_load($nodes) {
                 'serial_no' => $hardware_record->serial_no
             );
         }
+
+        $software_query = db_select('helpdesk_ticket_software', 'ts');
+
+        $software_query->join('helpdesk_software', 's', 'ts.software = s.sid');
+        $software_query->fields('s', array('sid', 'name', 'serial_no'));
+        $software_query->condition('node', $record->nid, '=');
+
+        $software_result = $software_query->execute();
+
+        foreach ($software_result as $software_record) {
+            $nodes[$record->nid]->software_list[] = array(
+                'sid' => $software_record->sid,
+                'name' => $software_record->name,
+                'serial_no' => $software_record->serial_no
+            );
+        }
     }
 }
 
@@ -271,19 +287,69 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#collapsible' => TRUE
     );
 
-    $software = _get_full_software_list();
+    $software_options = _get_full_software_list();
     
-    if (count($software) > 0) {
-        $form['software']['software_name'] = array(
-            '#type' => 'select',
-            '#title' => t('Name'),
-            '#options' => $software
+    if (count($software_options) > 0) {
+        $form['software']['software_section'] = array(
+            '#prefix' => '<div id="software-wrapper">',
+            '#suffix' => '</div>',
+            '#theme' => 'hardware_table'
         );
 
-        $form['software']['add_software_button'] = array(
-            '#type' => 'button',
-            '#value' => t('Add software')
-        );
+        if (isset($node->software_list)) {
+            $key = 0;
+
+            foreach ($node->software_list as $software) {
+                $form['software']['software_section'][$key] = array('#tree' => TRUE);
+                
+                $form['software']['software_section'][$key]['name'] = array(
+                    '#type' => 'value',
+                    '#value' => $software['name']
+                );
+
+                $form['software']['software_section'][$key]['serial_no'] = array(
+                    '#type' => 'value',
+                    '#value' => $software['serial_no']
+                );
+
+                // Remove the software from the select as it has already been added
+                unset($software_options[$software['hid']]);
+
+                $key++;
+            }
+        }
+
+        if (count($software_options) > 0) { 
+            $form['software']['software_section']['software_name'] = array(
+                '#type' => 'select',
+                '#title' => t('Name'),
+                '#options' => $software_options
+            );
+
+            $form['software']['software_section']['add_software_button'] = array(
+                '#type' => 'submit',
+                '#value' => t('Add software'),
+                '#limit_validation_errors' => array(
+                    array(
+                        'software_name'
+                    )
+                ),
+                '#submit' => array(
+                    'add_software_submit'
+                ),
+                '#ajax' => array(
+                    'callback' => 'add_software_js',
+                    'wrapper' => 'software-wrapper',
+                    'effect' => 'fade'
+                )
+            );
+        }
+        else {
+            $form['software']['software_section']['all_software_message'] = array(
+                '#type' => 'markup',
+                '#markup' => 'You have added all available software to this issue.<br>'
+            );
+        }
     }
 
     $form['software']['new_software_link'] = array(
@@ -314,6 +380,10 @@ function add_hardware_js($form, &$form_state) {
     return $form['hardware']['hardware_section'];
 }
 
+function add_software_js($form, &$form_state) {
+    return $form['software']['software_section'];
+}
+
 function add_hardware_submit($form, &$form_state) {
     $hid = $form_state['values']['hardware_name'];
 
@@ -328,6 +398,25 @@ function add_hardware_submit($form, &$form_state) {
         'hid' => $hid,
         'name' => $hardware['name'],
         'serial_no' => $hardware['serial_no']
+    );
+
+    $form_state['rebuild'] = TRUE;
+}
+
+function add_software_submit($form, &$form_state) {
+    $sid = $form_state['values']['software_name'];
+
+    $result = db_select('helpdesk_software', 's')
+        ->fields('s', array('name', 'serial_no'))
+        ->condition('sid', $sid, '=')
+        ->execute();
+
+    $software = $result->fetchAssoc();
+
+    $form_state['node']->software_list[] = array(
+        'sid' => $sid,
+        'name' => $software['name'],
+        'serial_no' => $software['serial_no']
     );
 
     $form_state['rebuild'] = TRUE;
@@ -440,13 +529,16 @@ function helpdesk_ticket_update($node) {
  * Helper function for inserting or updating a node.
  */
 function _helpdesk_ticket_merge($node) {
-    if ($node->specialist === '')
-    {
+    if ($node->specialist === '') {
         $node->specialist = NULL;
     }
 
     if (!isset($node->hardware_list)) {
         $node->hardware_list = array();
+    }
+
+    if (!isset($node->software_list)) {
+        $node->software_list = array();
     }
 
     // Add or update the ticket
@@ -470,6 +562,17 @@ function _helpdesk_ticket_merge($node) {
             ->fields(array(
                 'node' => $node->nid,
                 'hardware' => $hardware['hid']
+            ))
+            ->execute();
+    }
+
+    // Add or update the software associated with this ticket
+    foreach ($node->software_list as $software) {
+        db_merge('helpdesk_ticket_software')
+            ->key(array('node' => $node->nid, 'software' => $software['sid']))
+            ->fields(array(
+                'node' => $node->nid,
+                'software' => $software['sid']
             ))
             ->execute();
     }
