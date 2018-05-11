@@ -493,7 +493,12 @@ function theme_hardware_wrapper($variables) {
         }
     }
 
-    $output = theme('table', array('header' => $header, 'rows' => $rows));
+    $output = 'None added.';
+
+    if (count($rows) > 0) {
+        $output = theme('table', array('header' => $header, 'rows' => $rows));
+    }
+
     $output .= drupal_render_children($form);
 
     return $output;
@@ -567,11 +572,15 @@ function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
             $hardware_rows[] = array('name' => $hardware['name'], 'serial_no' => $hardware['serial_no']);
         }
 
-        $hardware_table = theme('table', array('header' => $header, 'rows' => $hardware_rows));
+        $hardware_output = 'None added.';
+
+        if (count($hardware_rows) > 0) {
+            $hardware_output = theme('table', array('header' => $header, 'rows' => $hardware_rows));
+        }
 
         $node->content['hardware'] = array(
             '#type' => 'markup',
-            '#markup' => '<h4><b>Hardware</b></h4>' . $hardware_table
+            '#markup' => '<h4><b>Hardware</b></h4>' . $hardware_output
         );
 
         $software_rows = array();
@@ -580,11 +589,15 @@ function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
             $software_rows[] = array('name' => $software['name'], 'serial_no' => $software['serial_no']);
         }
 
-        $software_table = theme('table', array('header' => $header, 'rows' => $software_rows));
+        $software_output = 'None added.';
+
+        if (count($software_rows) > 0) {
+            $software_output = theme('table', array('header' => $header, 'rows' => $software_rows));
+        }
 
         $node->content['software'] = array(
             '#type' => 'markup',
-            '#markup' => '<h4><b>Software</b></h4>' . $software_table
+            '#markup' => '<h4><b>Software</b></h4>' . $software_output
         );
     }
 
