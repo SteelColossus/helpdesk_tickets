@@ -818,13 +818,6 @@ function helpdesk_client_form($form, &$form_state){
 }
 
 /**
- * Validation function for the add helpdesk clients form.
- */
-function helpdesk_client_form_validate($form, &$form_state) {
-    return TRUE;
-}
-
-/**
  * Submit function for the add helpdesk clients form.
  */
 function helpdesk_client_form_submit($form, &$form_state) {
@@ -892,13 +885,6 @@ function helpdesk_hardware_form($form, &$form_state) {
 }
 
 /**
- * Validation function for the add hardware form.
- */
-function helpdesk_hardware_form_validate($form, &$form_state) {
-    return TRUE;
-}
-
-/**
  * Submit function for the add hardware form.
  */
 function helpdesk_hardware_form_submit($form, &$form_state) {
@@ -962,13 +948,6 @@ function helpdesk_software_form($form, &$form_state) {
 }
 
 /**
- * Validation function for the add software form.
- */
-function helpdesk_software_form_validate($form, &$form_state) {
-    return TRUE;
-}
-
-/**
  * Submit function for the add software form.
  */
 function helpdesk_software_form_submit($form, &$form_state) {
@@ -1020,13 +999,6 @@ function helpdesk_problem_type_form($form, &$form_state) {
     );
 
     return $form;
-}
-
-/**
- * Validation function for the add problem types form.
- */
-function helpdesk_problem_type_form_validate($form, &$form_state) {
-    return TRUE;
 }
 
 /**
@@ -1105,8 +1077,6 @@ function helpdesk_specialist_form_validate($form, &$form_state) {
     if ($result->rowCount() > 0) {
         form_set_error('helpdesk_tickets_specialist_expertise', 'The specialist already has that expertise.');
     }
-
-    return TRUE;
 }
 
 /**
