@@ -60,7 +60,6 @@ function helpdesk_ticket_load($nodes) {
 
         foreach ($hardware_result as $hardware_record) {
             $nodes[$record->nid]->hardware_list[] = array(
-                'hid' => $hardware_record->hid,
                 'name' => $hardware_record->name,
                 'serial_no' => $hardware_record->serial_no
             );
@@ -185,7 +184,8 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['problem_container']['problem']['#ajax'] = array(
         'callback' => 'change_specialist_text',
-        'wrapper' => 'specialist-wrapper'
+        'wrapper' => 'specialist-wrapper',
+        'effect' => 'fade'
     );
 
     $form['hardware'] = array(
@@ -194,27 +194,26 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#collapsible' => TRUE
     );
 
-    $hardware = _get_full_hardware_list();
+    $hardware_options = _get_full_hardware_list();
     
-    if (count($hardware) > 0) {
+    if (count($hardware_options) > 0) {
         $form['hardware']['hardware_list'] = array(
             '#prefix' => '<div id="hardware-list">',
             '#suffix' => '</div>',
             '#theme' => 'hardware_table'
         );
 
-        $key = 0;
-        $hardware_options = array();
+        if (isset($node->hardware_list)) {
+            $key = 0;
 
-        foreach ($node->hardware_list as $hardware) {
-            $form['hardware']['hardware_list'][$key] = array(
-                '#type' => 'value',
-                '#value' => $hardware['serial_no']
-            );
+            foreach ($node->hardware_list as $hardware) {
+                $form['hardware']['hardware_list'][$key] = array(
+                    '#type' => 'value',
+                    '#value' => $hardware['serial_no']
+                );
 
-            $hardware_options[$hardware['hid']] = $hardware['name'];
-
-            $key++;
+                $key++;
+            }
         }
 
         $form['hardware']['hardware_name'] = array(
@@ -307,7 +306,6 @@ function add_hardware_submit($form, &$form_state) {
     $hardware = $result->fetchAssoc();
 
     $form_state['node']->hardware_list[] = array(
-        'hid' => $hid,
         'name' => $hardware['name'],
         'serial_no' => $hardware['serial_no']
     );
