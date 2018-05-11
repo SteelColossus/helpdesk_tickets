@@ -313,7 +313,7 @@ function helpdesk_ticket_form($node, &$form_state) {
                 );
 
                 // Remove the software from the select as it has already been added
-                unset($software_options[$software['hid']]);
+                unset($software_options[$software['sid']]);
 
                 $key++;
             }
