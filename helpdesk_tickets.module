@@ -88,7 +88,6 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->problem = $record->problem;
         $nodes[$record->nid]->specialist = $record->specialist;
         $nodes[$record->nid]->notes = $record->notes;
-        $nodes[$record->nid]->hardware_list = array();
 
         $hardware_query = db_select('helpdesk_ticket_hardware', 'th');
 
@@ -97,6 +96,8 @@ function helpdesk_ticket_load($nodes) {
         $hardware_query->condition('node', $record->nid, '=');
 
         $hardware_result = $hardware_query->execute();
+        
+        $nodes[$record->nid]->hardware_list = array();
 
         foreach ($hardware_result as $hardware_record) {
             $nodes[$record->nid]->hardware_list[] = array(
@@ -113,6 +114,8 @@ function helpdesk_ticket_load($nodes) {
         $software_query->condition('node', $record->nid, '=');
 
         $software_result = $software_query->execute();
+        
+        $nodes[$record->nid]->software_list = array();
 
         foreach ($software_result as $software_record) {
             $nodes[$record->nid]->software_list[] = array(
@@ -478,7 +481,7 @@ function add_software_submit($form, &$form_state) {
 function theme_hardware_wrapper($variables) {
     $form = $variables['form'];
 
-    $headers = array('Name', 'Serial Number');
+    $header = array(t('Name'), t('Serial Number'));
     $rows = array();
 
     foreach (element_children($form) as $key) {
@@ -490,7 +493,7 @@ function theme_hardware_wrapper($variables) {
         }
     }
 
-    $output = theme('table', array('header' => $headers, 'rows' => $rows));
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
     $output .= drupal_render_children($form);
 
     return $output;
@@ -501,7 +504,7 @@ function theme_hardware_wrapper($variables) {
  * Display a node.
  * Node-type specific.
  */
-function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
+function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
     $priority_text = t(ucwords(_get_priority_name($node->priority)));
 
     $node->content['priority'] = array(
@@ -546,11 +549,42 @@ function helpdesk_ticket_view($node, $view_node, $langcode = NULL) {
         '#markup' => $specialist_text
     );
 
-    if ($node->notes !== '') {
-        $node->content['notes'] = array(
-            '#type' => 'item',
-            '#title' => t('Notes'),
-            '#markup' => $node->notes
+    if ($view_mode === 'full') {
+        if ($node->notes !== '') {
+            $node->content['notes'] = array(
+                '#type' => 'item',
+                '#title' => t('Notes'),
+                '#markup' => $node->notes
+            );
+        }
+
+        $header = array(t('Name'), t('Serial Number'));
+        $keys = array('name', 'serial_no');
+
+        $hardware_rows = array();
+
+        foreach ($node->hardware_list as $hardware) {
+            $hardware_rows[] = array('name' => $hardware['name'], 'serial_no' => $hardware['serial_no']);
+        }
+
+        $hardware_table = theme('table', array('header' => $header, 'rows' => $hardware_rows));
+
+        $node->content['hardware'] = array(
+            '#type' => 'markup',
+            '#markup' => '<h4><b>Hardware</b></h4>' . $hardware_table
+        );
+
+        $software_rows = array();
+
+        foreach ($node->software_list as $software) {
+            $software_rows[] = array('name' => $software['name'], 'serial_no' => $software['serial_no']);
+        }
+
+        $software_table = theme('table', array('header' => $header, 'rows' => $software_rows));
+
+        $node->content['software'] = array(
+            '#type' => 'markup',
+            '#markup' => '<h4><b>Software</b></h4>' . $software_table
         );
     }
 
