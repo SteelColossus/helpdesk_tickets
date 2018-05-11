@@ -1044,9 +1044,11 @@ function helpdesk_software_submissions() {
     $rows = array();
     
     foreach ($results AS $result) {
+        $ticket_no = db_query("SELECT COUNT(node) AS ticket FROM helpdesk_ticket_software WHERE software = {$result->sid}");
         $rows[] = array(
             $result->name,
             $result->serial_no,
+            $ticket_no->fetchField(),
         );
     }
     
