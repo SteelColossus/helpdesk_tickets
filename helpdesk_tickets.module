@@ -832,6 +832,102 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_specialist_submissions',
             'access arguments' => array('administer helpdesk_tickets'),
         ),
+        
+        'helpdesk_tickets' => array(
+            'title' => 'Helpdesk Ticketing System',
+            'description' => 'Configure the helpdesk ticketing system.',
+            'access arguments' => array('can add and view caller'),
+        ),
+        'helpdesk_tickets/client' => array(
+            'title' => 'Clients',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('can add and view caller'),
+        ),
+        'helpdesk_tickets/client/add' => array(
+            'title' => 'Add Clients',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_client_form'),
+            'access arguments' => array('can add and view caller'),
+        ),
+        'helpdesk_tickets/client/view' => array(
+            'title' => 'Helpdesk Client List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_client_submissions',
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/hardware' => array(
+            'title' => 'Hardware',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/hardware/add' => array(
+            'title' => 'Add Hardware',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_hardware_form'),
+            'access arguments' => array('can add information'),
+        ),
+        'helpdesk_tickets/hardware/view' => array(
+            'title' => 'Hardware List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_hardware_submissions',
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/software' => array(
+            'title' => 'Software',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/software/add' => array(
+            'title' => 'Add Software',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_software_form'),
+            'access arguments' => array('can add information'),
+        ),
+        'helpdesk_tickets/software/view' => array(
+            'title' => 'Software List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_software_submissions',
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/problem_type' => array(
+            'title' => 'Problem Type',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/problem_type/add' => array(
+            'title' => 'Add Problem Type',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_problem_type_form'),
+            'access arguments' => array('can add information'),
+        ),
+        'helpdesk_tickets/problem_type/view' => array(
+            'title' => 'Problem Type List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_problem_type_submissions',
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/specialist' => array(
+            'title' => 'Specialist',
+            'type' => MENU_LOCAL_TASK,
+            'access arguments' => array('can view information'),
+        ),
+        'helpdesk_tickets/specialist/add' => array(
+            'title' => 'Add Expertise',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('helpdesk_specialist_form'),
+            'access arguments' => array('can add information'),
+        ),
+        'helpdesk_tickets/specialist/view' => array(
+            'title' => 'Specialist List',
+            'type' => MENU_LOCAL_TASK,
+            'page callback' => 'helpdesk_specialist_submissions',
+            'access arguments' => array('can view information'),
+        ),
     );
 
     return $items;
