@@ -42,28 +42,28 @@ function helpdesk_tickets_permission() {
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //add hardware, software, problem type, expertises
-        'can view information' => array(
-            'title' => t('Administer Helpdesk Tickets'),
+        'can add information' => array(
+            'title' => t('Can Add Information'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //view hardware, software, problem type, expertises
         'can view information' => array(
-            'title' => t('Administer Helpdesk Tickets'),
+            'title' => t('Can View Information'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //add and view caller
         'can add and view caller' => array(
-            'title' => t('Administer Helpdesk Tickets'),
+            'title' => t('Can add and view callers'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //view tickets and overview
         'can view tickets' => array(
-            'title' => t('Administer Helpdesk Tickets'),
+            'title' => t('can view tickets'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //view analytics
         'can view analytics' => array(
-            'title' => t('Administer Helpdesk Tickets'),
+            'title' => t('can view analytics'),
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
     );
