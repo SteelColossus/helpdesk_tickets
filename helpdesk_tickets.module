@@ -38,7 +38,6 @@ function helpdesk_tickets_permission() {
     return array(
         'administer helpdesk_tickets' => array(
             'title' => t('Administer Helpdesk Tickets'),
-            'restrict access' => TRUE,
             'description' => t('Perform administration tasks for Helpdesk Tickets.'),
         ),
         //add hardware, software, problem type, expertises
@@ -183,7 +182,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['caller_container']['new_caller_link'] = array(
         '#type' => 'markup',
-        '#markup' => l(t('Add a new caller'), 'admin/helpdesk_tickets/client/add')
+        '#markup' => l(t('Add a new caller'), 'helpdesk_tickets/client/add')
     );
 
     if (isset($node->caller)) {
@@ -210,7 +209,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['problem_container']['new_problem_link'] = array(
         '#type' => 'markup',
-        '#markup' => l(t('Add a new problem type'), 'admin/helpdesk_tickets/problem_type/add')
+        '#markup' => l(t('Add a new problem type'), 'helpdesk_tickets/problem_type/add')
     );
 
     if (!empty($node->specialist)) {
@@ -336,7 +335,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['hardware']['new_hardware_link'] = array(
         '#type' => 'markup',
-        '#markup' => l(t('Add a new piece of hardware'), 'admin/helpdesk_tickets/hardware/add')
+        '#markup' => l(t('Add a new piece of hardware'), 'helpdesk_tickets/hardware/add')
     );
 
     $form['software'] = array(
@@ -412,7 +411,7 @@ function helpdesk_ticket_form($node, &$form_state) {
 
     $form['software']['new_software_link'] = array(
         '#type' => 'markup',
-        '#markup' => l(t('Add a new piece of software'), 'admin/helpdesk_tickets/software/add')
+        '#markup' => l(t('Add a new piece of software'), 'helpdesk_tickets/software/add')
     );
 
     $form['notes'] = array(
@@ -719,18 +718,6 @@ function helpdesk_tickets_menu() {
             'title' => 'Helpdesk Tickets Overview',
             'type' => MENU_NORMAL_ITEM,
             'page callback' => 'helpdesk_tickets_list_page',
-            'access callback' => TRUE
-        ),
-        'hardware_list' => array(
-            'title' => 'Hardware Overview',
-            'type' => MENU_NORMAL_ITEM,
-            'page callback' => 'helpdesk_hardware_submissions',
-            'access callback' => TRUE
-        ),
-        'software_list' => array(
-            'title' => 'Software Overview',
-            'type' => MENU_NORMAL_ITEM,
-            'page callback' => 'helpdesk_software_submissions',
             'access callback' => TRUE
         ),
         'admin/helpdesk_tickets' => array(
