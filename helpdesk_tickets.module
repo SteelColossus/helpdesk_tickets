@@ -83,11 +83,10 @@ function helpdesk_tickets_permission() {
  * Node-type specific.
  */
 function helpdesk_ticket_load($nodes) {
-    $query = db_select('helpdesk_ticket', 't')
-        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist', 'notes'))
-        ->condition('nid', array_keys($nodes), 'IN');
-
-    $result = $query->execute();
+    $result = db_select('helpdesk_ticket', 't')
+        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist', 'notes', 'solution', 'solution_author'))
+        ->condition('nid', array_keys($nodes), 'IN')
+        ->execute();
 
     foreach ($result as $record) {
         $nodes[$record->nid]->priority = $record->priority;
@@ -96,6 +95,7 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->problem = $record->problem;
         $nodes[$record->nid]->specialist = $record->specialist;
         $nodes[$record->nid]->notes = $record->notes;
+        $nodes[$record->nid]->solution_author = $record->solution_author;
 
         $hardware_query = db_select('helpdesk_ticket_hardware', 'th');
 
@@ -131,6 +131,15 @@ function helpdesk_ticket_load($nodes) {
                 'name' => $software_record->name,
                 'serial_no' => $software_record->serial_no
             );
+        }
+
+        if ($record->solution !== NULL) {
+            $solution_result = db_select('helpdesk_solution', 's')
+                ->fields('s', array('solution'))
+                ->condition('sid', $record->solution, '=')
+                ->execute();
+
+            $nodes[$record->nid]->solution_text = $solution_result->fetchField();
         }
     }
 }
@@ -465,6 +474,10 @@ function helpdesk_ticket_form($node, &$form_state) {
             '#required' => TRUE
         );
 
+        if (isset($node->solution_text)) {
+            $form['solution']['solution_text']['#default_value'] = $node->solution_text;
+        }
+
         $users = _get_full_users_list();
 
         if (isset($form_state['values'])) {
@@ -481,7 +494,7 @@ function helpdesk_ticket_form($node, &$form_state) {
             '#description' => t('Who solved this ticket\'s issue.'),
             '#required' => TRUE,
             '#options' => $users,
-            '#default_value' => array_search($specialists[$solution_specialist], $users)
+            '#default_value' => isset($node->solution_author) ? $node->solution_author : array_search($specialists[$solution_specialist], $users)
         );
     }
     else
@@ -732,6 +745,34 @@ function _helpdesk_ticket_merge($node) {
         $node->software_list = array();
     }
 
+    $closed_date = NULL;
+    $sid = NULL;
+
+    if ($node->state == 2) {
+        $closed_date = $node->changed;
+
+        $result = db_select('helpdesk_solution', 's')
+            ->fields('s', array('sid'))
+            ->condition('problem', $node->problem, '=')
+            ->condition('solution', $node->solution_text, '=')
+            ->execute();
+
+        if ($result->rowCount() === 0) {
+            $sid = db_insert('helpdesk_solution')
+            ->fields(array(
+                'problem' => $node->problem,
+                'solution' => $node->solution_text
+            ))
+            ->execute();
+        }
+        else {
+            $sid = $result->fetchField();
+        }
+    }
+    else {
+        $node->solution_author = NULL;
+    }
+
     // Add or update the ticket
     db_merge('helpdesk_ticket')
         ->key(array('nid' => $node->nid))
@@ -742,7 +783,10 @@ function _helpdesk_ticket_merge($node) {
             'cid' => $node->caller,
             'problem' => $node->problem,
             'specialist' => $node->specialist,
-            'notes' => $node->notes
+            'notes' => $node->notes,
+            'solution' => $sid,
+            'solution_author' => $node->solution_author,
+            'closed_date' => $closed_date
         ))
         ->execute();
 
