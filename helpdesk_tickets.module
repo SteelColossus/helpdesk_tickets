@@ -172,7 +172,12 @@ function helpdesk_ticket_form($node, &$form_state) {
         '#options' => isset($node->state) ? $states : array($open_key => $states[$open_key]),
         '#description' => t('Select what state this issue is in.'),
         '#required' => TRUE,
-        '#default_value' => isset($node->state) ? $node->state : 1
+        '#default_value' => isset($node->state) ? $node->state : 1,
+        '#ajax' => array(
+            'callback' => 'change_solution_ajax_callback',
+            'wrapper' => 'solution-wrapper',
+            'effect' => 'fade'
+        )
     );
 
     $form['caller_container'] = array(
@@ -437,23 +442,53 @@ function helpdesk_ticket_form($node, &$form_state) {
     $form['solution'] = array(
         '#type' => 'fieldset',
         '#title' => t('Solution'),
-        '#collapsible' => TRUE
+        '#collapsible' => TRUE,
+        '#prefix' => '<div id="solution-wrapper">',
+        '#suffix' => '</div>'
     );
 
-    $form['solution']['solution_text'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Solution'),
-        '#description' => t('How this ticket\'s issue was solved.')
-    );
+    if (isset($form_state['values'])) {
+        $state = $form_state['values']['state'];
+    }
+    else
+    {
+        $state = $form['state']['#default_value'];
+    }
+    
+    $show_solution = $state == 2;
 
-    $users = _get_full_users_list();
+    if ($show_solution) {
+        $form['solution']['solution_text'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Solution'),
+            '#description' => t('How this ticket\'s issue was solved.'),
+            '#required' => TRUE
+        );
 
-    $form['solution']['solution_author'] = array(
-        '#type' => 'select',
-        '#title' => t('Solution author'),
-        '#description' => t('Who solved this ticket\'s issue.'),
-        '#options' => $users
-    );
+        $users = _get_full_users_list();
+
+        if (isset($form_state['values'])) {
+            $solution_specialist = $form_state['values']['specialist'];
+        }
+        else
+        {
+            $solution_specialist = $form['specialist']['#default_value'];
+        }
+
+        $form['solution']['solution_author'] = array(
+            '#type' => 'select',
+            '#title' => t('Solution author'),
+            '#description' => t('Who solved this ticket\'s issue.'),
+            '#required' => TRUE,
+            '#options' => $users,
+            '#default_value' => array_search($specialists[$solution_specialist], $users)
+        );
+    }
+    else
+    {
+        // Hide the solution fieldset
+        $form['solution']['#type'] = 'value';
+    }
 
     return $form;
 }
@@ -481,6 +516,13 @@ function add_hardware_ajax_callback($form, &$form_state) {
  */
 function add_software_ajax_callback($form, &$form_state) {
     return $form['software']['software_section'];
+}
+
+/**
+ * Ajax callback for the solution wrapper.
+ */
+function change_solution_ajax_callback($form, &$form_state) {
+    return $form['solution'];
 }
 
 /**
