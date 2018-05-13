@@ -4,6 +4,15 @@
  * helpdesk_tickets.module
  */
 
+//function helpdesk_tickets_init(){
+//    if(current_path() == 'ticket_list'){
+//        
+//    }
+//}
+
+
+
+
 /**
  * Implementation of hook_node_info().
  * Define module-provided node types.
@@ -955,8 +964,9 @@ function helpdesk_tickets_build_pie($id, $type = 'global', $object = NULL){
             $result = db_query("SELECT COUNT(t.nid) AS count, s.state as label, s.sid FROM {helpdesk_ticket} t LEFT JOIN {helpdesk_state} s ON t.state = s.sid LEFT JOIN {node} n ON t.nid = n.nid WHERE n.status = 1 $filter GROUP BY s.sid", $args);
             break;
     }
+    $label = '';
     foreach ($result as $data) {
-        if ($id == 'tickets_open') {
+        if ($id == 'open_tickets') {
             if ($data->sid == 2) {
                 $label = t('closed');
             }
@@ -969,6 +979,7 @@ function helpdesk_tickets_build_pie($id, $type = 'global', $object = NULL){
         $chart['#data_colors'][] = chart_unique_color($label);
         $chart['#adjust_resolution'] = TRUE;
     }
+  return theme('chart', array('chart' => $chart));
 
 }
 
@@ -1340,6 +1351,9 @@ function helpdesk_specialist_submissions() {
  * Page function for the ticket list page.
  */
 function helpdesk_tickets_list_page() {
+    //drupal_get_form(tickets_list_form);
+    drupal_add_css(drupal_get_path('module', 'helpdesk_tickets') . '/table_colours.css');
+    
     $header = array(
         array('data' => t('Issue'), 'field' => 'title'),
         array('data' => t('Caller'), 'field' => 'caller'),
@@ -1378,9 +1392,15 @@ function helpdesk_tickets_list_page() {
     $rows = array();
 
     foreach ($result as $record) {
+        $state_colour = "table_open";
+        if($record->state != 'open'){
+            $state_colour = "table_closed";
+        }
         $rows[] = array(
             'data' => array($record->title, $record->caller, $record->problem, $record->priority, $record->state, format_date($record->date, 'short'), $record->creator),
-            'onclick' => 'window.location=\'/ticket/' . $record->id . '\''
+            'onclick' => 'window.location=\'/ticket/' . $record->id . '\'',
+            'id' => $record->id,
+            'class' => $state_colour,
         );
     }
 
@@ -1391,6 +1411,14 @@ function helpdesk_tickets_list_page() {
     }
 
     return $output;
+}
+
+function tickets_list_form($form, &$form_state){
+    $form['search'] = array(
+        '#type' => 'textfield',
+        '#description' => t('Search for tickets'),
+        '#required' => FALSE
+    );
 }
 
 /**
