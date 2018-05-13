@@ -58,7 +58,7 @@ function helpdesk_tickets_schema() {
             ),
             'solution' => array(
                 'description' => 'The primary identifier for a solution.',
-                'type' => 'serial',
+                'type' => 'int',
                 'unsigned' => TRUE
             ),
             'solution_author' => array(
