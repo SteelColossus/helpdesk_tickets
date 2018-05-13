@@ -426,6 +426,27 @@ function helpdesk_ticket_form($node, &$form_state) {
         $form['notes']['#default_value'] = $node->notes;
     }
 
+    $form['solution'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Solution'),
+        '#collapsible' => TRUE
+    );
+
+    $form['solution']['solution_text'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Solution'),
+        '#description' => t('How this ticket\'s issue was solved.')
+    );
+
+    $users = _get_full_users_list();
+
+    $form['solution']['solution_author'] = array(
+        '#type' => 'select',
+        '#title' => t('Solution author'),
+        '#description' => t('Who solved this ticket\'s issue.'),
+        '#options' => $users
+    );
+
     return $form;
 }
 
@@ -1138,7 +1159,7 @@ function helpdesk_specialist_form($form, &$form_state) {
  * Validation function for the add specialists form.
  */
 function helpdesk_specialist_form_validate($form, &$form_state) {
-    $result = db_select('helpdesk_expertises', 'e')
+    $result = db_select('helpdesk_expertise', 'e')
         ->fields('e')
         ->condition('specialist', $form_state['values']['helpdesk_tickets_specialist_name'], '=')
         ->condition('problem', $form_state['values']['helpdesk_tickets_specialist_expertise'], '=')
@@ -1153,7 +1174,7 @@ function helpdesk_specialist_form_validate($form, &$form_state) {
  * Administration form function for the view specialists form.
  */
 function helpdesk_specialist_form_submit($form, &$form_state) {
-    db_insert('helpdesk_expertises')
+    db_insert('helpdesk_expertise')
         ->fields(array(
             'specialist' => $form_state['values']['helpdesk_tickets_specialist_name'],
             'problem' => $form_state['values']['helpdesk_tickets_specialist_expertise']
@@ -1172,7 +1193,7 @@ function helpdesk_specialist_submissions() {
     $query = db_select('users', 'u');
 
     $query->join('users_roles', 'ur', 'u.uid = ur.uid');
-    $query->leftJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
+    $query->leftJoin('helpdesk_expertise', 'e', 'u.uid = e.specialist');
     $query->leftJoin('helpdesk_problem_type', 'p', 'e.problem = p.pid');
 
     $query->addField('u', 'name', 'specialist');
@@ -1376,6 +1397,24 @@ function _get_full_problem_type_list() {
 }
 
 /**
+ * Helper function to get the list of all users mapped with unique id and user name.
+ */
+function _get_full_users_list() {
+    $users = array();
+
+    $query = db_select('users', 'u');
+
+    $result = $query->fields('u', array('uid', 'name'))
+        ->execute();
+
+    foreach ($result as $user) {
+        $users[$user->uid] = $user->name;
+    }
+
+    return $users;
+}
+
+/**
  * Helper function to get the list of all specialists mapped with unique id and user name.
  */
 function _get_full_specialists_list() {
@@ -1407,7 +1446,7 @@ function _get_full_specialists_list_ordered_by_expertise($problem_type_id) {
     $query = db_select('users', 'u');
 
     $query->join('users_roles', 'ur', 'u.uid = ur.uid');
-    $query->leftJoin('helpdesk_expertises', 'e', 'u.uid = e.specialist');
+    $query->leftJoin('helpdesk_expertise', 'e', 'u.uid = e.specialist');
 
     $query->fields('u', array('uid', 'name'));
     $query->fields('e', array('problem'));

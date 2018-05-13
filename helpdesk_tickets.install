@@ -55,6 +55,20 @@ function helpdesk_tickets_schema() {
                 'description' => 'Any additional notes for this ticket.',
                 'type' => 'text',
                 'length' => 255
+            ),
+            'solution' => array(
+                'description' => 'The primary identifier for a solution.',
+                'type' => 'serial',
+                'unsigned' => TRUE
+            ),
+            'solution_author' => array(
+                'description' => 'The id of the user that came up with the solution.',
+                'type' => 'int',
+                'unsigned' => TRUE
+            ),
+            'closed_date' => array(
+                'description' => 'The Unix timestamp for the date that the ticket was most recently closed.',
+                'type' => 'int'
             )
         ),
         // Used for documentation only.
@@ -275,7 +289,41 @@ function helpdesk_tickets_schema() {
         'primary key' => array('node', 'software')
     );
 
-    $schema['helpdesk_expertises'] = array(
+    $schema['helpdesk_solution'] = array(
+        'description' => 'Stores the solutions to the problems in helpdesk tickets.',
+        'fields' => array(
+            'sid' => array(
+                'description' => 'The primary identifier for a solution.',
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'problem' => array(
+                'description' => 'The primary identifier for a problem type.',
+                'type' => 'int',
+                'unsigned' => TRUE,
+                'not null' => TRUE
+            ),
+            'solution' => array(
+                'description' => 'The solution description for a ticket.',
+                'type' => 'varchar',
+                'length' => 255,
+                'not null' => TRUE
+            )
+        ),
+        // Used for documentation only.
+        'foreign keys' => array(
+            'fk_problem_id' => array(
+                'table' => 'helpdesk_problem_type',
+                'columns' => array(
+                    'pid' => 'problem'
+                )
+            )
+        ),
+        'primary key' => array('sid'),
+    );
+
+    $schema['helpdesk_expertise'] = array(
         'description' => 'Stores the problem types that specialists are experts at.',
         'fields' => array(
             'specialist' => array(
