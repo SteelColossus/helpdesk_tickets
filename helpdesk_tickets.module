@@ -84,7 +84,7 @@ function helpdesk_tickets_permission() {
  */
 function helpdesk_ticket_load($nodes) {
     $result = db_select('helpdesk_ticket', 't')
-        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist', 'notes', 'solution', 'solution_author'))
+        ->fields('t', array('nid', 'priority', 'state', 'cid', 'problem', 'specialist', 'notes', 'solution', 'solution_author', 'closed_date'))
         ->condition('nid', array_keys($nodes), 'IN')
         ->execute();
 
@@ -96,6 +96,7 @@ function helpdesk_ticket_load($nodes) {
         $nodes[$record->nid]->specialist = $record->specialist;
         $nodes[$record->nid]->notes = $record->notes;
         $nodes[$record->nid]->solution_author = $record->solution_author;
+        $nodes[$record->nid]->closed_date = $record->closed_date;
 
         $hardware_query = db_select('helpdesk_ticket_hardware', 'th');
 
@@ -670,6 +671,11 @@ function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
             );
         }
 
+        $node->content['hardware_software'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Hardware/Software')
+        );
+
         $header = array(t('Name'), t('Serial Number'));
         $keys = array('name', 'serial_no');
 
@@ -685,7 +691,7 @@ function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
             $hardware_output = theme('table', array('header' => $header, 'rows' => $hardware_rows));
         }
 
-        $node->content['hardware'] = array(
+        $node->content['hardware_software']['hardware'] = array(
             '#type' => 'markup',
             '#markup' => '<h4><b>Hardware</b></h4>' . $hardware_output
         );
@@ -702,10 +708,37 @@ function helpdesk_ticket_view($node, $view_mode, $langcode = NULL) {
             $software_output = theme('table', array('header' => $header, 'rows' => $software_rows));
         }
 
-        $node->content['software'] = array(
+        $node->content['hardware_software']['software'] = array(
             '#type' => 'markup',
             '#markup' => '<h4><b>Software</b></h4>' . $software_output
         );
+
+        if ($node->state == 2) {
+            $node->content['solution'] = array(
+                '#type' => 'fieldset',
+                '#title' => t('Solution')
+            );
+
+            $node->content['solution']['solution_text'] = array(
+                '#type' => 'item',
+                '#title' => t('Solution'),
+                '#markup' => t($node->solution_text)
+            );
+            
+            $solution_author_text = t(_get_user_name($node->solution_author));
+
+            $node->content['solution']['solution_author'] = array(
+                '#type' => 'item',
+                '#title' => t('Solution author'),
+                '#markup' => $solution_author_text
+            );
+
+            $node->content['solution']['closed_date'] = array(
+                '#type' => 'item',
+                '#title' => t('Closed date'),
+                '#markup' => '<i>' . format_date($node->closed_date, 'short') . '</i>'
+            );
+        }
     }
 
     return $node;
