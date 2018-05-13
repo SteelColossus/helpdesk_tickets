@@ -479,6 +479,23 @@ function helpdesk_ticket_form($node, &$form_state) {
             $form['solution']['solution_text']['#default_value'] = $node->solution_text;
         }
 
+        $previous_solutions = _get_full_solutions_list($node->problem);
+
+        if (count($previous_solutions) > 0) {
+            $form['solution']['previous_solutions'] = array(
+                '#type' => 'select',
+                '#title' => t('Previous solutions'),
+                '#description' => t('Check the previous solutions to see if they solve the issue.'),
+                '#options' => $previous_solutions,
+                '#empty_option' => t('- Select one to set it as the solution -'),
+                '#ajax' => array(
+                    'callback' => 'change_solution_ajax_callback',
+                    'wrapper' => 'solution-wrapper',
+                    'effect' => 'fade'
+                )
+            );
+        }
+
         $users = _get_full_users_list();
 
         if (isset($form_state['values'])) {
@@ -536,6 +553,11 @@ function add_software_ajax_callback($form, &$form_state) {
  * Ajax callback for the solution wrapper.
  */
 function change_solution_ajax_callback($form, &$form_state) {
+    if (isset($form_state['values']['previous_solutions']) && $form_state['values']['previous_solutions'] != '') {
+        $form['solution']['solution_text']['#value'] = $form['solution']['previous_solutions']['#options'][$form_state['values']['previous_solutions']];
+        $form['solution']['previous_solutions']['#value'] = '';
+    }
+
     return $form['solution'];
 }
 
@@ -974,7 +996,6 @@ function helpdesk_tickets_menu() {
             'page callback' => 'helpdesk_specialist_submissions',
             'access arguments' => array('administer helpdesk_tickets'),
         ),
-
         'helpdesk_tickets' => array(
             'title' => 'Helpdesk Ticketing System',
             'description' => 'Configure the helpdesk ticketing system.',
@@ -1790,4 +1811,22 @@ function _get_full_software_list() {
     }
 
     return $software_list;
+}
+
+/**
+ * Helper function to get the list of all solutions given a problem type mapped with unique id and description.
+ */
+function _get_full_solutions_list($problem_type) {
+    $solution_list = array();
+
+    $result = db_select('helpdesk_solution', 's')
+        ->fields('s', array('sid', 'solution'))
+        ->condition('problem', $problem_type, '=')
+        ->execute();
+
+    foreach ($result as $solution) {
+        $solution_list[$solution->sid] = $solution->solution;
+    }
+
+    return $solution_list;
 }
