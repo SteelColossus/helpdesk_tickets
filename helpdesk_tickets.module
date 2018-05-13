@@ -930,7 +930,7 @@ function helpdesk_tickets_charts_page(){
     $output = '';
 
     $output .= helpdesk_tickets_build_pie('open_tickets');
-    $output .= helpdesk_tickets_build_pie('open_tickets_individual');
+    //$output .= helpdesk_tickets_build_pie('open_tickets_individual');
 
     return $output;
 }
@@ -946,29 +946,30 @@ function helpdesk_tickets_build_pie($id, $type = 'global', $object = NULL){
             $chart['#chart_id'] = 'open_tickets';
             $chart['#title'] = t('Open tickets');
             $filter = '';
-            $result = db_query("SELECT COUNT(t.nid) AS count, s.state as label, s.isclosed FROM {helpdesk_ticket} t LEFT JOIN {helpdesk_state} s ON t.state = s.sid LEFT JOIN {node} n ON t.nid = n.nid WHERE n.status = 1 $filter GROUP BY s.isclosed ORDER BY s.isclosed", $args);
+            $result = db_query("SELECT COUNT(t.nid) AS count, s.state as label, s.sid FROM {helpdesk_ticket} t LEFT JOIN {helpdesk_state} s ON t.state = s.sid LEFT JOIN {node} n ON t.nid = n.nid WHERE n.status = 1 $filter GROUP BY s.sid", $args);
             break;
         case 'open_tickets_individual':
             $chart['#chart_id'] = 'open_tickets';
             $chart['#title'] = t('Open tickets');
             $filter = "AND n.uid = :uid";
-            $result = db_query("SELECT COUNT(t.nid) AS count, s.state as label, s.isclosed FROM {helpdesk_ticket} t LEFT JOIN {helpdesk_state} s ON t.state = s.sid LEFT JOIN {node} n ON t.nid = n.nid WHERE n.status = 1 $filter GROUP BY s.isclosed ORDER BY s.isclosed", $args);
+            $result = db_query("SELECT COUNT(t.nid) AS count, s.state as label, s.sid FROM {helpdesk_ticket} t LEFT JOIN {helpdesk_state} s ON t.state = s.sid LEFT JOIN {node} n ON t.nid = n.nid WHERE n.status = 1 $filter GROUP BY s.sid", $args);
             break;
     }
     foreach ($result as $data) {
         if ($id == 'tickets_open') {
-            if ($data->isclosed) {
+            if ($data->sid == 2) {
                 $label = t('closed');
             }
             else {
                 $label = t('open');
             }
         }
+        $chart['#data'][] = $data->count;
+        $chart['#labels'][] = "$label: $data->count";
+        $chart['#data_colors'][] = chart_unique_color($label);
+        $chart['#adjust_resolution'] = TRUE;
     }
-    $chart['#data'][] = $data->count;
-    $chart['#labels'][] = "$label: $data->count";
-    $chart['#data_colors'][] = chart_unique_color($label);
-    $chart['#adjust_resolution'] = TRUE;
+
 }
 
 /**
