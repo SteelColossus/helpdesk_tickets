@@ -4,15 +4,6 @@
  * helpdesk_tickets.module
  */
 
-//function helpdesk_tickets_init(){
-//    if(current_path() == 'ticket_list'){
-//        
-//    }
-//}
-
-
-
-
 /**
  * Implementation of hook_node_info().
  * Define module-provided node types.
